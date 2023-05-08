@@ -1,19 +1,9 @@
-# This is a sample Python script.
-
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-import os, sys
-import numpy as np
-import matplotlib
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+from src.model.Translator import Translator
 
 
-# Press the green button in the gutter to run the script.
+def main():
+    translator = Translator()
+
+
 if __name__ == '__main__':
-    print(os.path.dirname(sys.executable))
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    main()

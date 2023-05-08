@@ -1,0 +1,8 @@
+
+DATA_PATH = r"D:\Dataset\PhoMT_small"
+
+CORPUS_SIZE = 5000
+BATCH_SIZE = 64
+
+START_TOKEN = '[START]'
+END_TOKEN = '[END]'
