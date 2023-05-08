@@ -2,6 +2,9 @@ import os
 import tensorflow as tf
 import numpy as np
 
+__all__ = ['get_all_file', 'make_vocabulary', 'load_vocabulary', 'to_lower_normalize', 'text_to_tokens',
+           'tokens_to_text', 'visualize_board']
+
 
 def get_all_file(path):
     all_files = []
@@ -39,6 +42,16 @@ def load_vocabulary(paths):
     return source_vocab, target_vocab
 
 
+def to_lower_normalize(text):
+    # Split accented characters.
+    text = tf.strings.lower(text, encoding='utf-8')
+    # Strip whitespace.
+    text = tf.strings.strip(text)
+
+    text = tf.strings.join(['[START]', text, '[END]'], separator=' ')
+    return text
+
+
 def text_to_tokens(processor, text):
     text = tf.convert_to_tensor(text)
     if len(text.shape) == 0:
@@ -59,3 +72,7 @@ def tokens_to_text(processor, tokens):
 
     result_text = tf.strings.strip(result_text)
     return result_text
+
+
+def visualize_board():
+    pass
