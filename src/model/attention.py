@@ -29,3 +29,8 @@ class Attention(keras.layers.Layer):
         )
 
         return context_vector, attention_weights
+
+
+class CrossAtention(keras.layers.Layer):
+    def __init__(self):
+        super().__init__()

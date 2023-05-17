@@ -1,3 +1,4 @@
+import tensorflow as tf
 from tensorflow import keras
 
 
@@ -16,9 +17,12 @@ class Encoder(keras.layers.Layer):
                                    recurrent_initializer='glorot_uniform'),
             merge_mode='sum')
 
-    def call(self, x):
+    def call(self, x, state):
         x = self.embedding(x)
-        enc_seq, fs, bs = self.bi_gru(x)
+        enc_seq, fs, bs = self.bi_gru(x, state)
 
-        state = keras.layers.Add()([fs, bs])
-        return enc_seq, state
+        enc_state = keras.layers.Add()([fs, bs])
+        return enc_seq, enc_state
+
+    def init_state(self, batch_size):
+        return [tf.zeros([batch_size, self.hidden_units]), tf.zeros([batch_size, self.hidden_units])]

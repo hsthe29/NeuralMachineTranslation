@@ -1,8 +1,8 @@
 import numpy as np
 import tensorflow as tf
-from src import config
 
 __all__ = ['load_dataset', 'normalize_dataset', 'take_dataset', 'split_dataset']
+
 
 def load_dataset(path):
     with open(path, 'r', encoding='utf-8') as f:
@@ -21,9 +21,10 @@ def normalize_dataset(source_sentences, target_sentences):
 def take_dataset(source_sentences, target_sentences, corpus_size, threshold=40):
     train_src_raw = []
     train_tar_raw = []
+    max_sentences = len(source_sentences)
 
     n = 0
-    for i in range(n):
+    for i in range(max_sentences):
         if len(source_sentences[i].split()) <= threshold:
             train_src_raw.append(source_sentences[i])
             train_tar_raw.append(target_sentences[i])
@@ -34,32 +35,34 @@ def take_dataset(source_sentences, target_sentences, corpus_size, threshold=40):
     return train_src_raw, train_tar_raw
 
 
-def split_dataset(source_sentences, target_sentences, ratio=0.8):
+def split_dataset(sentence_pairs, batch_size, ratio=0.8):
+    sentence_pairs = tuple(sentence_pairs)
     ratio += 0.01
-    is_train = np.random.uniform(size=(config.TRAINING_SIZE,)) < ratio
+    size = len(sentence_pairs)
+    is_train = np.random.uniform(size=(size,)) < ratio
 
     train_en_selection = []
     val_en_selection = []
     train_vi_selection = []
     val_vi_selection = []
 
-    for i in range(config.TRAINING_SIZE):
+    for i, pair in enumerate(sentence_pairs):
         if is_train[i]:
-            train_en_selection.append(source_sentences[i])
-            train_vi_selection.append(target_sentences[i])
+            train_en_selection.append(pair[0])
+            train_vi_selection.append(pair[1])
         else:
-            val_en_selection.append(source_sentences[i])
-            val_vi_selection.append(target_sentences[i])
+            val_en_selection.append(pair[0])
+            val_vi_selection.append(pair[1])
 
     train_raw = (
         tf.data.Dataset
         .from_tensor_slices((train_en_selection, train_vi_selection))
-        .shuffle(config.TRAINING_SIZE)
-        .batch(config.BATCH_SIZE))
+        .shuffle(size)
+        .batch(batch_size))
     val_raw = (
         tf.data.Dataset
         .from_tensor_slices((val_en_selection, val_vi_selection))
-        .shuffle(config.TRAINING_SIZE)
-        .batch(config.BATCH_SIZE))
+        .shuffle(size)
+        .batch(batch_size))
 
     return train_raw, val_raw

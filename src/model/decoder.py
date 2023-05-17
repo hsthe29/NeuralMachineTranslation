@@ -1,23 +1,13 @@
 import tensorflow as tf
 from tensorflow import keras
-from src.model.Attention import Attention
+from src.model.attention import Attention
 
 
 class Decoder(keras.layers.Layer):
     def __init__(self, vocab_size, embedding_size, units):
         super(Decoder, self).__init__()
-        # self.target_processor = target_processor
         self.attention_weights = None
         self.vocab_size = vocab_size
-        # self.word_to_id = tf.keras.layers.StringLookup(
-        #     vocabulary=target_processor.get_vocabulary(),
-        #     mask_token='', oov_token='[UNK]')
-        # self.id_to_word = tf.keras.layers.StringLookup(
-        #     vocabulary=target_processor.get_vocabulary(),
-        #     mask_token='', oov_token='[UNK]',
-        #     invert=True)
-        # self.start_token = self.word_to_id('[START]')
-        # self.end_token = self.word_to_id('[END]')
 
         self.embedding_size = embedding_size
         self.units = units

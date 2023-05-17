@@ -1,39 +1,44 @@
 import tensorflow as tf
 from tensorflow import keras
 import numpy as np
-from src.model.Decoder import Decoder
-from src.model.Encoder import Encoder
+
+from src.model.decoder import Decoder
+from src.model.encoder import Encoder
 from src.utils import text_to_tokens, tokens_to_text
 
 
 class Translator(keras.Model):
-    def __init__(self, units, source_embedding_size,
-                 target_embedding_size,
-                 source_processor,
-                 target_processor):
+    def __init__(self, source_processor,
+                 target_processor, config):
         super(Translator, self).__init__()
 
+        embedding_size = config['embedding_size']
+        units = config['recurrent_units']
         # Build the encoder and decoder
-        self.encoder = Encoder(source_processor.vocabulary_size(), source_embedding_size, units)
-        self.decoder = Decoder(target_processor.vocabulary_size(), target_embedding_size, units)
+        self.encoder = Encoder(source_processor.vocab_size, embedding_size, units)
+        self.decoder = Decoder(target_processor.vocab_size, embedding_size, units)
 
         self.source_processor = source_processor
         self.target_processor = target_processor
 
         self.index_from_string = tf.keras.layers.StringLookup(
-            vocabulary=self.target_processor.get_vocabulary(), mask_token='')
-        token_mask_ids = self.index_from_string(['', '[UNK]', '[START]']).numpy()
+            vocabulary=self.target_processor.vocab, mask_token=config['mask_token'])
+        token_mask_ids = self.index_from_string([config['mask_token'],
+                                                 config['oov_token'],
+                                                 config['start_token']]).numpy()
 
         self.token_mask = np.zeros([self.index_from_string.vocabulary_size()], bool)
         self.token_mask[np.array(token_mask_ids)] = True
 
-        self.start_token = self.index_from_string(tf.constant('[START]'))
-        self.end_token = self.index_from_string(tf.constant('[END]'))
+        self.start_token = self.index_from_string(tf.constant(config['start_token']))
+        self.end_token = self.index_from_string(tf.constant(config['end_token']))
 
     def call(self, inputs):
         in_tok, tar_in = inputs
         input_mask = in_tok != 0
-        enc_output, enc_state = self.encoder(in_tok)
+        batch_size = tf.shape(in_tok)[0]
+        first_state = self.encoder.init_state(batch_size)
+        enc_output, enc_state = self.encoder(in_tok, first_state)
 
         logits, dec_state = self.decoder(tar_in, enc_output, input_mask=input_mask, state=enc_state)
         return logits, dec_state
@@ -45,10 +50,10 @@ class Translator(keras.Model):
         tar_out = out_tok[:, 1:]
         tokens = (in_tok, tar_in)
         target_mask = tar_out != 0
+        y_true = tar_out
 
         with tf.GradientTape() as tape:
             logits, _ = self.call(tokens)
-            y_true = tar_out
             y_pred = logits
             step_loss = self.loss(y_true, y_pred)
             step_loss /= tf.reduce_sum(tf.cast(target_mask, tf.float32))
@@ -57,7 +62,31 @@ class Translator(keras.Model):
         gradients = tape.gradient(step_loss, variables)
         self.optimizer.apply_gradients(zip(gradients, variables))
 
-        return {'loss': step_loss}
+        eval_result = {self.loss.name: step_loss}
+        self.compiled_metrics.update_state(y_true, y_pred)
+        # Return a dict mapping metric names to current value
+        eval_result.update({m.name: m.result() for m in self.metrics})
+        return eval_result
+
+    @tf.function
+    def test_step(self, inputs):
+        in_tok, out_tok = inputs
+        tar_in = out_tok[:, :-1]
+        tar_out = out_tok[:, 1:]
+        tokens = (in_tok, tar_in)
+        target_mask = tar_out != 0
+        y_true = tar_out
+
+        logits, _ = self.call(tokens)
+        y_pred = logits
+        step_loss = self.loss(y_true, y_pred)
+        step_loss /= tf.reduce_sum(tf.cast(target_mask, tf.float32))
+
+        eval_result = {self.loss.name: step_loss}
+        self.compiled_metrics.update_state(y_true, y_pred)
+        # Return a dict mapping metric names to current value
+        eval_result.update({m.name: m.result() for m in self.metrics})
+        return eval_result
 
     def translate(self, input_texts, max_len, temperature=0.0, return_attention=True):
         input_tokens = text_to_tokens(self.source_processor, input_texts)

@@ -1,0 +1,28 @@
+mode: train
+
+model: "resnet50"
+en_data: "D:\\Dataset\\PhoMT_small\\train\\train.en"
+vi_data: "D:\\Dataset\\PhoMT_small\\train\\train.vi"
+save_checkpoint_per_epochs: 1
+ckpt_dir: "checkpoint\\"
+#log_dir: logs
+
+src_language: "en"
+tar_LANGUAGE: "vi"
+recurrent_units: 256
+embedding_size: 256
+sentences: 5000
+train_ratio: 0.85
+vocab_size: 1000
+batch_size: 64
+epochs: 2
+
+start_token: '[sos]'
+end_token: '[eos]'
+mask_token: ''
+oov_token: '[UNK]'
+
+adam:
+  lr: 0.001
+  beta_1: 0.9
+  beta_2: 0.999
