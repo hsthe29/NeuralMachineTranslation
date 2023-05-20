@@ -20,21 +20,23 @@ def make_checkpoint():
     return checkpoint_callback
 
 
+def save_vocabulary(vocab, file_path):
+    with open(file_path, 'w', encoding='utf-8') as f:
+        for word in vocab:
+            f.write(word + '\n')
+
+
 def main(config):
-    en_sentences = load_dataset(config['en_data'])
-    vi_sentences = load_dataset(config['vi_data'])
 
-    en_vocab = make_vocabulary(en_sentences, config['vocab_size'])
-    vi_vocab = make_vocabulary(vi_sentences, config['vocab_size'])
-
-    normalize_dataset(en_sentences, vi_sentences)
     train_en_raw, train_vi_raw = take_dataset(en_sentences, vi_sentences, config['sentences'])
 
     train_raw, val_raw = split_dataset(zip(train_en_raw, train_vi_raw),
                                        batch_size=config['batch_size'], ratio=config['train_ratio'])
 
-    en_processor = LanguageProcessor(en_vocab)
-    vi_processor = LanguageProcessor(vi_vocab)
+    signal_tokens = [config['start_token'], config['end_token']]
+
+    en_processor = LanguageProcessor(en_vocab, signal_tokens)
+    vi_processor = LanguageProcessor(vi_vocab, signal_tokens)
 
     def convert_dataset(source, target):
         return en_processor.convert_to_tensor(source), vi_processor.convert_to_tensor(target)
@@ -56,5 +58,17 @@ def main(config):
 if __name__ == '__main__':
     with open("config.yml") as f:
         config = yaml.load(f, Loader=yaml.SafeLoader)
-    print(tf.__version__)
-    main(config)
+
+    en_sentences = load_dataset(config['en_data'])
+    vi_sentences = load_dataset(config['vi_data'])
+
+    normalize(en_sentences)
+    normalize(vi_sentences)
+
+    en_vocab = make_vocabulary(en_sentences, config['vocab_size'])
+    vi_vocab = make_vocabulary(vi_sentences, config['vocab_size'])
+
+    save_vocabulary(en_vocab, 'vocab/vocab.en')
+    save_vocabulary(vi_vocab, 'vocab/vocab.vi')
+
+

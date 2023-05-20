@@ -3,20 +3,40 @@ import tensorflow as tf
 from src.utils import to_lower_normalize
 
 
-class LanguageProcessor:
-    def __init__(self, vocabulary):
-        self.processor = tf.keras.layers.TextVectorization(
+class Language:
+    def __init__(self, vocabulary, special_tokens):
+        mask_token, oov_token, start_token, end_token = special_tokens
+        vocab = [start_token, end_token] + vocabulary
+        self.__word_to_index = tf.keras.layers.TextVectorization(
             standardize=to_lower_normalize,
-            vocabulary=vocabulary,
+            vocabulary=vocab,
             ragged=True)
 
+        self.__index_to_word = tf.keras.layers.StringLookup(
+            vocabulary=vocab,
+            mask_token=mask_token,
+            invert=True)
+
     def convert_to_tensor(self, text):
-        return self.processor(text).to_tensor()
+        text = tf.convert_to_tensor(text)
+        if len(text.shape) == 0:
+            text = tf.convert_to_tensor(text)[tf.newaxis]
+
+        return self.__word_to_index(text).to_tensor()
+
+    def convert_to_text(self, tokens):
+        result_text_tokens = self.__index_to_word(tokens)
+
+        result_text = tf.strings.reduce_join(result_text_tokens,
+                                             axis=1, separator=' ')
+
+        result_text = tf.strings.strip(result_text)
+        return result_text
 
     @property
     def vocab_size(self):
-        return self.processor.vocabulary_size()
+        return self.__word_to_index.vocabulary_size()
 
     @property
     def vocab(self):
-        return self.processor.get_vocabulary()
+        return self.__word_to_index.get_vocabulary()

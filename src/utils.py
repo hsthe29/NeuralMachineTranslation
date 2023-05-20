@@ -1,9 +1,11 @@
 import os
 import tensorflow as tf
+from matplotlib import pyplot as plt
+from matplotlib import ticker
 import numpy as np
 
-__all__ = ['get_all_file', 'make_vocabulary', 'load_vocabulary', 'to_lower_normalize', 'text_to_tokens',
-           'tokens_to_text', 'visualize_board']
+__all__ = ['get_all_file', 'make_vocabulary', 'load_vocabulary', 'to_lower_normalize',
+           'get_special_tokens', 'visualize_attention']
 
 
 def get_all_file(path):
@@ -48,31 +50,36 @@ def to_lower_normalize(text):
     # Strip whitespace.
     text = tf.strings.strip(text)
 
-    text = tf.strings.join(['[START]', text, '[END]'], separator=' ')
+    text = tf.strings.join(['[sos]', text, '[eos]'], separator=' ')
     return text
 
 
-def text_to_tokens(processor, text):
-    text = tf.convert_to_tensor(text)
-    if len(text.shape) == 0:
-        text = tf.convert_to_tensor(text)[tf.newaxis]
-    context = processor(text).to_tensor()
-
-    return context
+def get_special_tokens(config):
+    return config['mask_token'], config['oov_token'], config['start_token'], config['end_token']
 
 
-def tokens_to_text(processor, tokens):
-    vocab = np.asarray(processor.get_vocabulary())
-    result_text_tokens = tf.map_fn(fn=lambda x: vocab[x.numpy()],
-                                   elems=tokens.to_tensor(), dtype=tf.string)
-    #  = list(map(lambda x: ' '.join(vocab[x]), tokens))
+def visualize_attention(attention, sentence, predicted_sentence):
+    sentence = to_lower_normalize(sentence).numpy().decode().split()
+    predicted_sentence = predicted_sentence.numpy().decode().split()
+    fig = plt.figure(figsize=(10, 10))
+    ax = fig.add_subplot(1, 1, 1)
 
-    result_text = tf.strings.reduce_join(result_text_tokens,
-                                         axis=1, separator=' ')
+    attention = attention[:len(predicted_sentence), :len(sentence)]
 
-    result_text = tf.strings.strip(result_text)
-    return result_text
+    ax.matshow(attention, cmap='viridis', vmin=0.0)
 
+    fontdict = {'fontsize': 14}
 
-def visualize_board():
-    pass
+    ax.set_xticklabels([''] + sentence, fontdict=fontdict, rotation=90)
+    ax.set_yticklabels([''] + predicted_sentence, fontdict=fontdict)
+
+    ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(1))
+
+    ax.set_xlabel('Input text')
+    ax.set_ylabel('Output text')
+    plt.suptitle('Attention weights')
+
+    plt.savefig('result/attention/attention1.png')
+
+    # plt.show()

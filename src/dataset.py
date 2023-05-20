@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 
-__all__ = ['load_dataset', 'normalize_dataset', 'take_dataset', 'split_dataset']
+__all__ = ['load_dataset', 'normalize', 'take_dataset', 'split_dataset']
 
 
 def load_dataset(path):
@@ -11,14 +11,13 @@ def load_dataset(path):
     return sentences
 
 
-def normalize_dataset(source_sentences, target_sentences):
-    n = len(source_sentences)
+def normalize(sentences):
+    n = len(sentences)
     for i in range(n):
-        source_sentences[i] = source_sentences[i].strip().lower()
-        target_sentences[i] = target_sentences[i].strip().lower()
+        sentences[i] = sentences[i].strip().lower()
 
 
-def take_dataset(source_sentences, target_sentences, corpus_size, threshold=40):
+def take_dataset(source_sentences, target_sentences, corpus_size=None, threshold=40):
     train_src_raw = []
     train_tar_raw = []
     max_sentences = len(source_sentences)

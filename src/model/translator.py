@@ -4,7 +4,6 @@ import numpy as np
 
 from src.model.decoder import Decoder
 from src.model.encoder import Encoder
-from src.utils import text_to_tokens, tokens_to_text
 
 
 class Translator(keras.Model):
@@ -26,6 +25,7 @@ class Translator(keras.Model):
         token_mask_ids = self.index_from_string([config['mask_token'],
                                                  config['oov_token'],
                                                  config['start_token']]).numpy()
+
 
         self.token_mask = np.zeros([self.index_from_string.vocabulary_size()], bool)
         self.token_mask[np.array(token_mask_ids)] = True
@@ -89,14 +89,15 @@ class Translator(keras.Model):
         return eval_result
 
     def translate(self, input_texts, max_len, temperature=0.0, return_attention=True):
-        input_tokens = text_to_tokens(self.source_processor, input_texts)
+        input_tokens = self.source_processor.convert_to_tensor(input_texts)
         input_mask = input_tokens != 0
         batch_size = tf.shape(input_tokens)[0]
 
-        enc_output, enc_state = self.encoder(input_tokens)
+        first_state = self.encoder.init_state(batch_size)
+        enc_output, enc_state = self.encoder(input_tokens, first_state)
         dec_state = enc_state
 
-        in_tokens = tf.reshape(tf.cast([2] * (input_tokens.shape[0]), tf.int64), shape=(-1, 1))
+        in_tokens = tf.reshape(tf.cast([self.start_token.numpy()]*batch_size.numpy(), tf.int64), shape=(-1, 1))
 
         result_tokens = []
         attention = []
@@ -118,15 +119,18 @@ class Translator(keras.Model):
                 new_tokens = tf.argmax(logits, axis=-1)
             else:
                 logits = tf.squeeze(logits, axis=1)
-                new_tokens = tf.random.categorical(logits / 1.0,
+                new_tokens = tf.random.categorical(logits/temperature,
                                                    num_samples=1)
             done = done | (new_tokens == self.end_token)
-            new_tokens = tf.where(done, tf.constant(0, dtype=tf.int64), new_tokens)
+            in_tokens = tf.where(done, tf.constant(0, dtype=tf.int64), new_tokens)
 
-            result_tokens.append(new_tokens)
+            result_tokens.append(in_tokens)
+
+            if tf.executing_eagerly() and tf.reduce_all(done):
+                break
 
         result_tokens = tf.concat(result_tokens, axis=-1)
-        result_text = tokens_to_text(self.target_processor, result_tokens)
+        result_text = self.target_processor.convert_to_text(result_tokens)
 
         if return_attention:
             attention_stack = tf.concat(attention, axis=1)
