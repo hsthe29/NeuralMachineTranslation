@@ -43,7 +43,7 @@ if __name__ == "__main__":
     # for index in indexes:
     #     samples.append(dev[index])
 
-    samples = ["Passengers no longer have to sit on the floor waiting for their flights ."]
+    samples = ["check off the things you accomplish each day , and reflect on how you feel afterwards ."]
     #
     for sentence in samples:
         print(' -> Source: ', sentence)

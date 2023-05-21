@@ -60,7 +60,7 @@ def get_special_tokens(config):
 
 def visualize_attention(attention, sentence, predicted_sentence):
     sentence = to_lower_normalize(sentence).numpy().decode().split()
-    predicted_sentence = predicted_sentence.numpy().decode().split()
+    predicted_sentence = to_lower_normalize(predicted_sentence).numpy().decode().split()[1:]
     fig = plt.figure(figsize=(10, 10))
     ax = fig.add_subplot(1, 1, 1)
 
@@ -80,6 +80,6 @@ def visualize_attention(attention, sentence, predicted_sentence):
     ax.set_ylabel('Output text')
     plt.suptitle('Attention weights')
 
-    plt.savefig('result/attention/attention1.png')
+    plt.savefig('result/attention/attention2.png')
 
     # plt.show()
