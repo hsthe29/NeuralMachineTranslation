@@ -31,6 +31,9 @@
 5. Kết quả:
     - Training: ![img.png](result/train/loss.png)
     - Accuracy: ![img.png](result/train/acc.png)
+   
+   **Nhận xét:** Độ chính xác của mô hình vẫn còn ở mức khá, cần phải tinh chỉnh mô hình hoặc tiền xử lý dữ liệu tốt hơn 
+
     - Attention: 
       - ![img.png](result/attention/attention.png)
       - ![img.png](result/attention/attention1.png)
@@ -47,8 +50,9 @@
 # Những công việc cần làm tiếp theo
 
 1. Thử các mô hình khác và chọn mô hình hiệu quả hơn (Transformer)
-2. Dịch từ Tiếng Việt -> Tiếng Anh
-3. Xử lý các từ không nằm trong từ điển
-4. Dịch các câu dài chính xác hơn
-5. Xử lý các câu văn bản tự nhiên trước khi đưa vào mô hình
-6. Có thể dịch sang các ngôn ngữ khác
+2. Tiền xử lý dữ liệu tốt hơn
+3. Dịch từ Tiếng Việt -> Tiếng Anh
+4. Xử lý các từ không nằm trong từ điển
+5. Dịch các câu dài chính xác hơn
+6. Xử lý các câu văn bản tự nhiên trước khi đưa vào mô hình
+7. Dịch sang các ngôn ngữ khác
