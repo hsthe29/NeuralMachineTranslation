@@ -1,8 +1,8 @@
 mode: train
 
 model: "resnet50"
-en_data: "D:\\Dataset\\PhoMT\\tokenization\\train\\train.en"
-vi_data: "D:\\Dataset\\PhoMT\\tokenization\\train\\train.vi"
+en_data: "D:\\Dataset\\PhoMT\\tokenization\\train\\train_normalized.en"
+vi_data: "D:\\Dataset\\PhoMT\\tokenization\\train\\train_normalized.vi"
 
 dev_en: "D:\\Dataset\\PhoMT\\tokenization\\dev\\dev.en"
 dev_vi: "D:\\Dataset\\PhoMT\\tokenization\\dev\\dev.vi"
@@ -11,6 +11,8 @@ save_checkpoint_per_epochs: 1
 ckpt_dir: "checkpoint\\"
 #log_dir: logs
 
+update_vocab: False
+
 src_language: "en"
 tar_LANGUAGE: "vi"
 recurrent_units: 256
@@ -18,7 +20,7 @@ embedding_size: 256
 sentences: 1000000
 train_size: 200000
 val_size: 30000
-vocab_size: 6000
+vocab_size: 8000
 batch_size: 64
 epochs: 2
 

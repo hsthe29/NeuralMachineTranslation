@@ -3,34 +3,20 @@ from tensorflow import keras
 
 
 class Attention(keras.layers.Layer):
-    def __init__(self, units):
+    def __init__(self, units, **kwargs):
         super().__init__()
-        self.W1 = tf.keras.layers.Dense(units, use_bias=False)
-        self.W2 = tf.keras.layers.Dense(units, use_bias=False)
+        self.mha = tf.keras.layers.MultiHeadAttention(key_dim=units, num_heads=3, **kwargs)
+        self.layer_norm = tf.keras.layers.LayerNormalization()
+        self.add = tf.keras.layers.Add()
 
-        self.attention = tf.keras.layers.AdditiveAttention()
+    def call(self, query, value):
+        attn_output, attn_scores = self.mha(
+            query=query,
+            value=value,
+            return_attention_scores=True)
 
-    def call(self, query, value, mask):
-        # query: batch, t, units
-        # value: batch, s, units
+        attn_scores = tf.reduce_mean(attn_scores, axis=1)
+        x = self.add([query, attn_output])
+        x = self.layer_norm(x)
 
-        # `W1@ht`.
-        w1_query = self.W1(query)
-
-        # `W2@hs`.
-        w2_value = self.W2(value)
-        query_mask = tf.ones(tf.shape(query)[:-1], dtype=bool)
-        value_mask = mask
-
-        context_vector, attention_weights = self.attention(
-            inputs=[w1_query, value, w2_value],
-            mask=[query_mask, value_mask],
-            return_attention_scores=True,
-        )
-
-        return context_vector, attention_weights
-
-
-class CrossAtention(keras.layers.Layer):
-    def __init__(self):
-        super().__init__()
+        return x, attn_scores

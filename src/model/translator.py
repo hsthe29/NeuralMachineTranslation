@@ -26,7 +26,6 @@ class Translator(keras.Model):
                                                  config['oov_token'],
                                                  config['start_token']]).numpy()
 
-
         self.token_mask = np.zeros([self.index_from_string.vocabulary_size()], bool)
         self.token_mask[np.array(token_mask_ids)] = True
 
@@ -35,12 +34,11 @@ class Translator(keras.Model):
 
     def call(self, inputs):
         in_tok, tar_in = inputs
-        input_mask = in_tok != 0
         batch_size = tf.shape(in_tok)[0]
         first_state = self.encoder.init_state(batch_size)
         enc_output, enc_state = self.encoder(in_tok, first_state)
 
-        logits, dec_state = self.decoder(tar_in, enc_output, input_mask=input_mask, state=enc_state)
+        logits, dec_state = self.decoder(tar_in, enc_output, state=enc_state)
         return logits, dec_state
 
     @tf.function
@@ -49,14 +47,12 @@ class Translator(keras.Model):
         tar_in = out_tok[:, :-1]
         tar_out = out_tok[:, 1:]
         tokens = (in_tok, tar_in)
-        target_mask = tar_out != 0
         y_true = tar_out
 
         with tf.GradientTape() as tape:
             logits, _ = self.call(tokens)
             y_pred = logits
             step_loss = self.loss(y_true, y_pred)
-            step_loss /= tf.reduce_sum(tf.cast(target_mask, tf.float32))
 
         variables = self.trainable_variables
         gradients = tape.gradient(step_loss, variables)
@@ -74,13 +70,11 @@ class Translator(keras.Model):
         tar_in = out_tok[:, :-1]
         tar_out = out_tok[:, 1:]
         tokens = (in_tok, tar_in)
-        target_mask = tar_out != 0
         y_true = tar_out
 
         logits, _ = self.call(tokens)
         y_pred = logits
         step_loss = self.loss(y_true, y_pred)
-        step_loss /= tf.reduce_sum(tf.cast(target_mask, tf.float32))
 
         eval_result = {self.loss.name: step_loss}
         self.compiled_metrics.update_state(y_true, y_pred)
@@ -97,7 +91,7 @@ class Translator(keras.Model):
         enc_output, enc_state = self.encoder(input_tokens, first_state)
         dec_state = enc_state
 
-        in_tokens = tf.reshape(tf.cast([self.start_token.numpy()]*batch_size.numpy(), tf.int64), shape=(-1, 1))
+        in_tokens = tf.reshape(tf.cast([self.start_token.numpy()] * batch_size.numpy(), tf.int64), shape=(-1, 1))
 
         result_tokens = []
         attention = []
@@ -108,7 +102,7 @@ class Translator(keras.Model):
             # 1. The current input to the decoder.
             # 2. The target for the decoder's next prediction.
 
-            logits, dec_state = self.decoder(in_tokens, enc_output, input_mask=input_mask, state=dec_state)
+            logits, dec_state = self.decoder(in_tokens, enc_output, state=dec_state)
             attention.append(self.decoder.attention_weights)
             token_mask = self.token_mask[tf.newaxis, tf.newaxis, :]
 
@@ -119,7 +113,7 @@ class Translator(keras.Model):
                 new_tokens = tf.argmax(logits, axis=-1)
             else:
                 logits = tf.squeeze(logits, axis=1)
-                new_tokens = tf.random.categorical(logits/temperature,
+                new_tokens = tf.random.categorical(logits / temperature,
                                                    num_samples=1)
             done = done | (new_tokens == self.end_token)
             in_tokens = tf.where(done, tf.constant(0, dtype=tf.int64), new_tokens)

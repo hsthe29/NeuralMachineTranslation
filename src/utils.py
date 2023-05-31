@@ -2,10 +2,8 @@ import os
 import tensorflow as tf
 from matplotlib import pyplot as plt
 from matplotlib import ticker
-import numpy as np
-
-__all__ = ['get_all_file', 'make_vocabulary', 'load_vocabulary', 'to_lower_normalize',
-           'get_special_tokens', 'visualize_attention']
+from underthesea import word_tokenize
+from src.dataset import *
 
 
 def get_all_file(path):
@@ -47,6 +45,10 @@ def load_vocabulary(paths):
 def to_lower_normalize(text):
     # Split accented characters.
     text = tf.strings.lower(text, encoding='utf-8')
+    # Keep space, a to z, and select punctuation.
+    # text = tf.strings.regex_replace(text, '[^ a-z.?!,¿]', '')
+    # Add spaces around punctuation.
+    text = tf.strings.regex_replace(text, '[.?!,:]', r' \0 ')
     # Strip whitespace.
     text = tf.strings.strip(text)
 
@@ -80,6 +82,36 @@ def visualize_attention(attention, sentence, predicted_sentence):
     ax.set_ylabel('Output text')
     plt.suptitle('Attention weights')
 
-    plt.savefig('result/attention/attention2.png')
+    # plt.savefig('result/attention/attention2.png')
 
-    # plt.show()
+    plt.show()
+
+
+def plot_history(history):
+    pass
+
+def tokenize_vi(text):
+    for i in range(len(text)):
+        text[i] = word_tokenize(text[i], format='text')
+    return text
+
+
+def save_vocabulary(vocab, file_path):
+    with open(file_path, 'w', encoding='utf-8') as f:
+        for word in vocab:
+            f.write(word + '\n')
+
+
+def load_vocab(file_path):
+    vocab = []
+
+    with open(file_path, 'r', encoding='utf-8') as f:
+        for line in f:
+            vocab.append(line.strip())
+
+    return vocab
+
+
+def update_vocab(corpus, vocab_size, path):
+    vocab = make_vocabulary(corpus, vocab_size)
+    save_vocabulary(vocab, path)

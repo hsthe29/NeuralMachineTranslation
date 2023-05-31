@@ -2,22 +2,9 @@ from src.model.processor import Language
 from src.model.translator import Translator
 from src.utils import *
 import tensorflow as tf
-import matplotlib.pyplot as plt
 import yaml
 
-
-def load_vocab(file_path):
-    vocab = []
-
-    with open(file_path, 'r', encoding='utf-8') as f:
-        for line in f:
-            vocab.append(line.strip())
-
-    return vocab
-
-
 if __name__ == "__main__":
-
     with open("config.yml") as f:
         config = yaml.load(f, Loader=yaml.SafeLoader)
 
@@ -43,8 +30,10 @@ if __name__ == "__main__":
     # for index in indexes:
     #     samples.append(dev[index])
 
-    samples = ["check off the things you accomplish each day , and reflect on how you feel afterwards ."]
+    # samples = ["check off the things you accomplish each day , and reflect on how you feel afterwards ."]
     #
+    samples = ["When I believed in forever , and everything would stay the same ."]
+    samples = tokenize_vi(samples)
     for sentence in samples:
         print(' -> Source: ', sentence)
         for temp in [0.0, 0.9]:
@@ -60,4 +49,3 @@ if __name__ == "__main__":
     result_texts = result['text']
     attentions = result['attention']
     visualize_attention(attentions[-1], samples[0], result_texts[0])
-
