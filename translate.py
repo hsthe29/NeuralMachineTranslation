@@ -8,7 +8,7 @@ if __name__ == "__main__":
     with open("config.yml") as f:
         config = yaml.load(f, Loader=yaml.SafeLoader)
 
-    checkpoint_filepath = 'checkpoint/translator.tf'
+    checkpoint_filepath = 'checkpoint/translator_v1.tf'
 
     en_vocab = load_vocab('vocab/vocab.en')
     vi_vocab = load_vocab('vocab/vocab.vi')
@@ -32,8 +32,8 @@ if __name__ == "__main__":
 
     # samples = ["check off the things you accomplish each day , and reflect on how you feel afterwards ."]
     #
-    samples = ["When I believed in forever , and everything would stay the same ."]
-    samples = tokenize_vi(samples)
+    samples = ["we do n't talk anymore like we used to do ."]
+    # samples = tokenize_vi(samples)
     for sentence in samples:
         print(' -> Source: ', sentence)
         for temp in [0.0, 0.9]:
