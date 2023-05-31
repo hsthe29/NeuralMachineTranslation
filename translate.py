@@ -42,7 +42,10 @@ if __name__ == "__main__":
 
     # samples = ["check off the things you accomplish each day , and reflect on how you feel afterwards ."]
     #
-    samples = ["we do n't talk anymore like we used to do ."]
+    samples = ["we do n't talk anymore like we used to do .",
+               "Recently , the potential limit has been increased yet again through heat assisted magnetic recording .",
+               "He enters the roots through a tiny slit in search of food",
+               "this was the first time i heard that people in my country were suffering"]
     for sentence in samples:
         print('en: ', sentence)
         result = pre_model.translate(sentence, max_len=40)
@@ -53,5 +56,5 @@ if __name__ == "__main__":
     #
     # result = pre_model.translate(sentence, max_len=40)
     # result_texts = result['text']
-    # attentions = result['attention']
-    # visualize_attention(attentions[-1], samples[0], result_texts[0])
+    attentions = result['attention']
+    visualize_attention(attentions[-1], samples[-1], result_texts[0])
