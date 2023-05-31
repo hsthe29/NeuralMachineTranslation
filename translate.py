@@ -21,8 +21,6 @@ if __name__ == "__main__":
     vi_processor = Language(vi_vocab, special_tokens)
 
     pre_model = Translator(en_processor, vi_processor, config)
-    pre_model.compile(optimizer=tf.optimizers.Adam(),
-                      loss=MaskedLoss(), metrics=[masked_acc])
     pre_model.load_weights(checkpoint_filepath)
 
     # dev = load_dataset(config['dev_en'])
