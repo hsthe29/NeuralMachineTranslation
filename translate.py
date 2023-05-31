@@ -30,6 +30,14 @@ if __name__ == "__main__":
     # for index in indexes:
     #     samples.append(dev[index])
 
+    # for sentence in samples:
+    #     print('en:', sentence)
+    #     result = pre_model.translate(sentence, max_len=40)
+    #     result_texts = result['text']
+    #     pred_sentence = result_texts[0].numpy().decode()
+    #     print('vi:', pred_sentence)
+    #     print()
+
     # samples = ["check off the things you accomplish each day , and reflect on how you feel afterwards ."]
     #
     samples = ["we do n't talk anymore like we used to do ."]
