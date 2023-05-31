@@ -2,6 +2,8 @@ from src.model.processor import Language
 from src.model.translator import Translator
 from src.utils import *
 import tensorflow as tf
+from src.losses import *
+from src.metrics import *
 import yaml
 
 if __name__ == "__main__":
@@ -19,6 +21,8 @@ if __name__ == "__main__":
     vi_processor = Language(vi_vocab, special_tokens)
 
     pre_model = Translator(en_processor, vi_processor, config)
+    pre_model.compile(optimizer=tf.optimizers.Adam(),
+                      loss=MaskedLoss(), metrics=[masked_acc])
     pre_model.load_weights(checkpoint_filepath)
 
     # dev = load_dataset(config['dev_en'])
@@ -41,19 +45,15 @@ if __name__ == "__main__":
     # samples = ["check off the things you accomplish each day , and reflect on how you feel afterwards ."]
     #
     samples = ["we do n't talk anymore like we used to do ."]
-    # samples = tokenize_vi(samples)
     for sentence in samples:
-        print(' -> Source: ', sentence)
-        for temp in [0.0, 0.9]:
-            result = pre_model.translate(sentence, max_len=40, temperature=temp)
-            result_texts = result['text']
-            print('temperature:', temp)
-            for bt in result_texts:
-                pred_sentence = bt.numpy().decode()
-                print(' -> Target: ', pred_sentence)
+        print('en: ', sentence)
+        result = pre_model.translate(sentence, max_len=40)
+        result_texts = result['text']
+        pred_sentence = result_texts[0].numpy().decode()
+        print('vi: ', pred_sentence)
         print()
-
-    result = pre_model.translate(sentence, max_len=40)
-    result_texts = result['text']
-    attentions = result['attention']
-    visualize_attention(attentions[-1], samples[0], result_texts[0])
+    #
+    # result = pre_model.translate(sentence, max_len=40)
+    # result_texts = result['text']
+    # attentions = result['attention']
+    # visualize_attention(attentions[-1], samples[0], result_texts[0])
