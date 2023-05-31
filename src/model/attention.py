@@ -6,7 +6,7 @@ class Attention(keras.layers.Layer):
     def __init__(self, units, **kwargs):
         super().__init__()
         self.mha = tf.keras.layers.MultiHeadAttention(key_dim=units, num_heads=3, **kwargs)
-        self.layer_norm = tf.keras.layers.LayerNormalization()
+        self.layernorm = tf.keras.layers.LayerNormalization()
         self.add = tf.keras.layers.Add()
 
     def call(self, query, value):
@@ -17,6 +17,6 @@ class Attention(keras.layers.Layer):
 
         attn_scores = tf.reduce_mean(attn_scores, axis=1)
         x = self.add([query, attn_output])
-        x = self.layer_norm(x)
+        x = self.layernorm(x)
 
         return x, attn_scores
