@@ -1,4 +1,6 @@
 import os
+import re
+
 import tensorflow as tf
 from matplotlib import pyplot as plt
 from matplotlib import ticker
@@ -42,18 +44,37 @@ def load_vocabulary(paths):
     return source_vocab, target_vocab
 
 
-def to_lower_normalize(text):
-    # Split accented characters.
-    text = tf.strings.lower(text, encoding='utf-8')
-    # Keep space, a to z, and select punctuation.
-    # text = tf.strings.regex_replace(text, '[^ a-z.?!,¿]', '')
-    # Add spaces around punctuation.
-    text = tf.strings.regex_replace(text, '[.?!,:]', r' \0 ')
-    # Strip whitespace.
-    text = tf.strings.strip(text)
+def preprocess_en(text):
+    text = text.casefold()
+    normalized_text = re.sub(r'''[^ a-z0-9.?!,'":]''', '', text)
 
-    text = tf.strings.join(['[sos]', text, '[eos]'], separator=' ')
-    return text
+    return normalized_text
+
+
+def preprocess_vi(text):
+    text = text.casefold()
+    normalized_text = re.sub(
+        r'''[^ aăâáắấàằầảẳẩãẵẫạặậđeêéếèềẻểẽễẹệiíìỉĩịoôơóốớòồờỏổởõỗỡọộợuưúứùừủửũữụựyýỳỷỹỵa-z0-9.?!,'":]''',
+        '', text)
+
+    return normalized_text
+
+
+def add_spaces(string):
+    pattern = r'(?<!\d\.\d)([.,])(?!\d)'
+    replaced_string = re.sub(pattern, r' \1 ', string.numpy().decode())
+    return replaced_string
+
+
+def text_normalize(texts):
+    texts = tf.convert_to_tensor(texts)
+    if len(texts.shape) == 0:
+        texts = tf.convert_to_tensor(texts)[tf.newaxis]
+    # Add spaces around punctuation.
+    texts = tf.map_fn(fn=add_spaces, elems=texts, fn_output_signature=tf.string)
+
+    texts = tf.strings.join(['[sos]', texts, '[eos]'], separator=' ')
+    return texts
 
 
 def get_special_tokens(config):
@@ -61,8 +82,8 @@ def get_special_tokens(config):
 
 
 def visualize_attention(attention, sentence, predicted_sentence):
-    sentence = to_lower_normalize(sentence).numpy().decode().split()
-    predicted_sentence = to_lower_normalize(predicted_sentence).numpy().decode().split()[1:]
+    sentence = text_normalize(sentence).numpy().decode().split()
+    predicted_sentence = text_normalize(predicted_sentence).numpy().decode().split()[1:]
     fig = plt.figure(figsize=(10, 10))
     ax = fig.add_subplot(1, 1, 1)
 
@@ -89,6 +110,7 @@ def visualize_attention(attention, sentence, predicted_sentence):
 
 def plot_history(history):
     pass
+
 
 def tokenize_vi(text):
     for i in range(len(text)):

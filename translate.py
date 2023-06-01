@@ -45,10 +45,17 @@ if __name__ == "__main__":
     samples = ["we do n't talk anymore like we used to do .",
                "Recently , the potential limit has been increased yet again through heat assisted magnetic recording .",
                "He enters the roots through a tiny slit in search of food",
-               "this was the first time i heard that people in my country were suffering"]
+               "i also did n't know that the second step is to isolate the victim",
+               "but most people do n't agree",
+               "this was the first time i heard that people in my country were suffering",
+               "And I want to talk through some examples today of things that people have done that I think are "
+               "really fascinating using flexible identity and anonymity on the web and blurring the lines between "
+               "fact and fiction .",
+               "And the reason why I bring up radio is that I think radio is a great example of how a new medium "
+               "defines new formats which then define new stories ."]
     for sentence in samples:
         print('en: ', sentence)
-        result = pre_model.translate(sentence, max_len=40)
+        result = pre_model.translate(sentence, max_len=50)
         result_texts = result['text']
         pred_sentence = result_texts[0].numpy().decode()
         print('vi: ', pred_sentence)

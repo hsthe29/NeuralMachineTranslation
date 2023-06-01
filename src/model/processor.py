@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-from src.utils import to_lower_normalize
+from src.utils import text_normalize
 
 
 class Language:
@@ -8,7 +8,7 @@ class Language:
         mask_token, oov_token, start_token, end_token = special_tokens
         vocab = [start_token, end_token] + vocabulary
         self.__word_to_index = tf.keras.layers.TextVectorization(
-            standardize=to_lower_normalize,
+            standardize=text_normalize,
             vocabulary=vocab,
             ragged=True)
 
