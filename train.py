@@ -5,65 +5,67 @@ from src.model.processor import Language
 from src.model.translator import Translator
 import tensorflow as tf
 from src.utils import *
-import yaml
+import config
 
 
-def make_checkpoint():
-    checkpoint_filepath = 'checkpoint/translator.tf'
+def get_checkpoint(path, save_weights_only=True,
+                   monitor='val_masked_acc',
+                   mode='max'):
     checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
-        filepath=checkpoint_filepath,
-        save_weights_only=True,
-        monitor='val_masked_acc',
-        mode='max',
+        filepath=path,
+        save_weights_only=save_weights_only,
+        monitor=monitor,
+        mode=mode,
         save_best_only=True
     )
     return checkpoint_callback
 
 
 def convert_dataset(source, target):
-    return en_processor.convert_to_tensor(source), vi_processor.convert_to_tensor(target)
+    return en_lang.convert_to_tensor(source), vi_lang.convert_to_tensor(target)
 
 
 if __name__ == '__main__':
-    with open("config.yml") as f:
-        config = yaml.load(f, Loader=yaml.SafeLoader)
 
-    signal_tokens = [config['start_token'], config['end_token']]
+    signal_tokens = get_special_tokens()
 
-    en_sentences = load_dataset(config['en_data'])
-    vi_sentences = load_dataset(config['vi_data'])
+    train_en = load_dataset('./data/normalized/train/train.en')
+    train_vi = load_dataset('./data/normalized/train/train.vi')
 
-    normalize(en_sentences)
-    normalize(vi_sentences)
+    val_en = load_dataset('./data/normalized/dev/dev.en')
+    val_vi = load_dataset('./data/normalized/dev/dev.vi')
 
-    if config['update_vocab']:
-        update_vocab(en_sentences, config['vocab_size'], 'vocab/vocab.en')
-        update_vocab(vi_sentences, config['vocab_size'], 'vocab/vocab.vi')
+    if config.update_vocab:
+        update_vocab(train_en, config.vocab_size, 'vocab/vocab.en')
+        update_vocab(train_vi, config.vocab_size, 'vocab/vocab.vi')
 
     en_vocab = load_vocab('vocab/vocab.en')
     vi_vocab = load_vocab('vocab/vocab.vi')
-    en_processor = Language(en_vocab, signal_tokens)
-    vi_processor = Language(vi_vocab, signal_tokens)
+    #
+    en_lang = Language(en_vocab, signal_tokens, 'en')
+    vi_lang = Language(vi_vocab, signal_tokens, 'vi')
+    #
+    # train_en, train_vi = filter_long_pairs(train_en, train_vi, config.train_size)
+    # val_en, val_vi = filter_long_pairs(val_en, val_vi, config.val_size)
+    #
+    # train_raw = make_dataset(train_en, train_vi, batch_size=config.batch_size)
+    # val_raw = make_dataset(val_en, val_vi, batch_size=config.batch_size)
+    #
+    # train_ds = train_raw.map(convert_dataset, tf.data.AUTOTUNE)
+    # val_ds = val_raw.map(convert_dataset, tf.data.AUTOTUNE)
+    #
+    # model = Translator(en_processor, vi_processor, config)
+    #
+    # model.compile(optimizer=tf.optimizers.Adam(config.optimizer['adam']['lr'],
+    #                                            config.optimizer['adam']['beta_1'],
+    #                                            config.optimizer['adam']['beta_2']),
+    #               loss=MaskedLoss(),
+    #               metrics=[masked_acc])
+    # checkpoint = get_checkpoint(config.ckpt_dir)
+    # history = model.fit(train_ds,
+    #                     epochs=config.epochs,
+    #                     validation_data=val_ds,
+    #                     callbacks=[checkpoint,
+    #                                tf.keras.callbacks.EarlyStopping(patience=5)])
 
-    train_en_raw, train_vi_raw = take_dataset(en_sentences, vi_sentences, config['sentences'])
-
-    train_raw, val_raw = split_dataset(zip(train_en_raw, train_vi_raw),
-                                       batch_size=config['batch_size'], ratio=config['train_ratio'])
-
-    train_ds = train_raw.map(convert_dataset, tf.data.AUTOTUNE)
-    val_ds = val_raw.map(convert_dataset, tf.data.AUTOTUNE)
-
-    model = Translator(en_processor, vi_processor, config)
-
-    model.compile(optimizer=tf.optimizers.Adam(config['adam']['lr'],
-                                               config['adam']['beta_1'],
-                                               config['adam']['beta_2']),
-                  loss=MaskedLoss(),
-                  metrics=[masked_acc])
-    checkpoint = make_checkpoint()
-    history = model.fit(train_ds, epochs=config['epochs'], validation_data=val_ds, callbacks=[checkpoint])
-
-    plot_history(history)
-
-
-
+    # plot_history(history)

@@ -1,14 +1,22 @@
 import tensorflow as tf
 
-from src.utils import text_normalize
+from src.utils import text_normalize_en, text_normalize_vi
 
 
 class Language:
-    def __init__(self, vocabulary, special_tokens):
+    def __init__(self, vocabulary, special_tokens, lang):
         mask_token, oov_token, start_token, end_token = special_tokens
         vocab = [start_token, end_token] + vocabulary
+
+        if lang == 'en':
+            self.preprocess = text_normalize_en
+        elif lang == 'vi':
+            self.preprocess = text_normalize_vi
+        else:
+            raise ValueError("Language is not currently supported!")
+
         self.__word_to_index = tf.keras.layers.TextVectorization(
-            standardize=text_normalize,
+            standardize=self.preprocess,
             vocabulary=vocab,
             ragged=True)
 

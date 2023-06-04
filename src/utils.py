@@ -1,32 +1,35 @@
-import os
 import re
-
-import tensorflow as tf
 from matplotlib import pyplot as plt
 from matplotlib import ticker
 from underthesea import word_tokenize
 from src.dataset import *
-
-
-def get_all_file(path):
-    all_files = []
-    for path, subdirs, files in os.walk(path):
-        for name in files:
-            all_files.append(os.path.join(path, name))
-
-    return all_files
+import config
 
 
 def make_vocabulary(sentences, vocab_size):
     word_dict = {}
+
+    with open(config.reversed_name, 'r', encoding='utf-8') as f:
+        reserved_names = f.readlines()
+
+    for i in range(len(reserved_names)):
+        reserved_names[i] = reserved_names[i].strip().casefold()
+    reserved_names = set(reserved_names)
+
     for sentence in sentences:
         words = sentence.split()
         for word in words:
+            if word in reserved_names:
+                continue
+            if bool(re.search(r'\d', word)):
+                continue
             if word in word_dict.keys():
                 word_dict[word] += 1
             else:
                 word_dict[word] = 0
+
     print(f"Found {len(word_dict.keys())} words")
+    print(f"Making dictionary of {vocab_size} words...")
     sorted_dict = sorted(word_dict.items(), key=lambda x: x[1], reverse=True)[:vocab_size]
     return list(map(lambda x: x[0], sorted_dict))
 
@@ -44,46 +47,65 @@ def load_vocabulary(paths):
     return source_vocab, target_vocab
 
 
-def preprocess_en(text):
+def normalize_en(text):
     text = text.casefold()
-    normalized_text = re.sub(r'''[^ a-z0-9.?!,'":]''', '', text)
+    text = text.strip()
+    text = re.sub(r'''[^ a-z0-9.?!,'":-]''', '', text)
 
+    normalized_text = add_spaces(text)
     return normalized_text
 
 
-def preprocess_vi(text):
+def normalize_vi(text):
     text = text.casefold()
-    normalized_text = re.sub(
-        r'''[^ aăâáắấàằầảẳẩãẵẫạặậđeêéếèềẻểẽễẹệiíìỉĩịoôơóốớòồờỏổởõỗỡọộợuưúứùừủửũữụựyýỳỷỹỵa-z0-9.?!,'":]''',
-        '', text)
-
+    text = text.strip()
+    text = re.sub(r'''[^ aăâáắấàằầảẳẩãẵẫạặậđeêéếèềẻểẽễẹệiíìỉĩịoôơóốớòồờỏổởõỗỡọộợuưúứùừủửũữụựyýỳỷỹỵa-z0-9.?!,'":-]''',
+                  '', text)
+    text = word_tokenize(text, format='text')
+    normalized_text = add_spaces(text)
     return normalized_text
 
 
-def add_spaces(string):
-    pattern = r'(?<!\d\.\d)([.,])(?!\d)'
-    replaced_string = re.sub(pattern, r' \1 ', string.numpy().decode())
-    return replaced_string
+def normalize_en_tf(text):
+    text = text.numpy().decode()
+    return normalize_en(text)
 
 
-def text_normalize(texts):
-    texts = tf.convert_to_tensor(texts)
-    if len(texts.shape) == 0:
-        texts = tf.convert_to_tensor(texts)[tf.newaxis]
+def normalize_vi_tf(text):
+    text = text.numpy().decode()
+    return normalize_vi(text)
+
+
+def add_spaces(text):
+    text = re.sub(r'(\d+\.\d+|\d+)([a-zA-Z])', r'\1 \2', text)
+    text = re.sub(r'([a-zA-Z])(\d+\.\d+|\d+)', r'\1 \2', text)
+    text = re.sub(r'(?<!\d\.\d)([.,])(?!\d)', r' \1 ', text)
+    return text
+
+
+def text_normalize_en(texts):
     # Add spaces around punctuation.
-    texts = tf.map_fn(fn=add_spaces, elems=texts, fn_output_signature=tf.string)
+    texts = tf.map_fn(fn=normalize_en_tf, elems=texts, fn_output_signature=tf.string)
 
     texts = tf.strings.join(['[sos]', texts, '[eos]'], separator=' ')
     return texts
 
 
-def get_special_tokens(config):
-    return config['mask_token'], config['oov_token'], config['start_token'], config['end_token']
+def text_normalize_vi(texts):
+    # Add spaces around punctuation.
+    texts = tf.map_fn(fn=normalize_vi_tf, elems=texts, fn_output_signature=tf.string)
+
+    texts = tf.strings.join(['[sos]', texts, '[eos]'], separator=' ')
+    return texts
+
+
+def get_special_tokens():
+    return config.mask_token, config.oov_token, config.start_token, config.end_token
 
 
 def visualize_attention(attention, sentence, predicted_sentence):
-    sentence = text_normalize(sentence).numpy().decode().split()
-    predicted_sentence = text_normalize(predicted_sentence).numpy().decode().split()[1:]
+    sentence = tf.squeeze(text_normalize_en(sentence)).numpy().decode().split()
+    predicted_sentence = tf.squeeze(text_normalize_vi(predicted_sentence)).numpy().decode().split()[1:]
     fig = plt.figure(figsize=(10, 10))
     ax = fig.add_subplot(1, 1, 1)
 
@@ -108,8 +130,29 @@ def visualize_attention(attention, sentence, predicted_sentence):
     plt.show()
 
 
-def plot_history(history):
-    pass
+def plot_history(history, save_img=False):
+    history = history.history
+    fig = plt.figure(figsize=(14, 5))
+    gs = fig.add_gridspec(ncols=2, hspace=0.0, wspace=0.2)
+    axes = gs.subplots()
+
+    axes[0].plot(history['masked_loss'])
+    axes[0].plot(history['val_masked_loss'])
+    axes[0].set_title('training masked loss')
+    axes[0].set_ylabel('loss')
+    axes[0].set_xlabel('epoch')
+    plt.legend(['train', 'val'], loc='upper left')
+
+    axes[1].plot(history['masked_acc'])
+    axes[1].plot(history['val_masked_acc'])
+    axes[1].set_title('training masked acc')
+    axes[1].set_ylabel('accuracy')
+    axes[1].set_xlabel('epoch')
+    plt.legend(['train', 'val'], loc='upper left')
+    if save_img:
+        plt.savefig('result/train/train_loss.png')
+    else:
+        plt.show()
 
 
 def tokenize_vi(text):

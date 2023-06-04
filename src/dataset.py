@@ -1,7 +1,6 @@
 import numpy as np
 import tensorflow as tf
-
-__all__ = ['load_dataset', 'normalize', 'take_dataset', 'split_dataset']
+from src.utils import normalize_en, normalize_vi
 
 
 def load_dataset(path):
@@ -11,57 +10,40 @@ def load_dataset(path):
     return sentences
 
 
-def normalize(sentences):
+def preprocess_data(sentences, lang):
     n = len(sentences)
-    for i in range(n):
-        sentences[i] = sentences[i].strip().lower()
+    if lang == 'en':
+        for i in range(n):
+            sentences[i] = normalize_en(sentences[i])
+    elif lang == 'vi':
+        for i in range(n):
+            sentences[i] = normalize_vi(sentences[i])
+    else:
+        raise ValueError(f"lang: {lang} not supported")
 
 
-def take_dataset(source_sentences, target_sentences, corpus_size=None, threshold=40):
-    train_src_raw = []
-    train_tar_raw = []
+def filter_long_pairs(source_sentences, target_sentences, size=None, threshold=40):
+    train_src = []
+    train_tar = []
     max_sentences = len(source_sentences)
 
     n = 0
     for i in range(max_sentences):
         if len(source_sentences[i].split()) <= threshold:
-            train_src_raw.append(source_sentences[i])
-            train_tar_raw.append(target_sentences[i])
+            train_src.append(source_sentences[i])
+            train_tar.append(target_sentences[i])
             n += 1
-            if n == corpus_size:
+            if n == size:
                 break
 
-    return train_src_raw, train_tar_raw
+    return train_src, train_tar
 
 
-def split_dataset(sentence_pairs, batch_size, ratio=0.8):
-    sentence_pairs = tuple(sentence_pairs)
-    ratio += 0.01
-    size = len(sentence_pairs)
-    is_train = np.random.uniform(size=(size,)) < ratio
+def make_dataset(source, target, batch_size):
+    size = len(source)
 
-    train_en_selection = []
-    val_en_selection = []
-    train_vi_selection = []
-    val_vi_selection = []
-
-    for i, pair in enumerate(sentence_pairs):
-        if is_train[i]:
-            train_en_selection.append(pair[0])
-            train_vi_selection.append(pair[1])
-        else:
-            val_en_selection.append(pair[0])
-            val_vi_selection.append(pair[1])
-
-    train_raw = (
+    return (
         tf.data.Dataset
-        .from_tensor_slices((train_en_selection, train_vi_selection))
+        .from_tensor_slices((source, target))
         .shuffle(size)
         .batch(batch_size))
-    val_raw = (
-        tf.data.Dataset
-        .from_tensor_slices((val_en_selection, val_vi_selection))
-        .shuffle(size)
-        .batch(batch_size))
-
-    return train_raw, val_raw
