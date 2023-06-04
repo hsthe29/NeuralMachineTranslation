@@ -15,12 +15,13 @@ class Encoder(keras.layers.Layer):
                                    return_sequences=True,
                                    return_state=True,
                                    recurrent_initializer='glorot_uniform'),
-            merge_mode='sum')
+            merge_mode='concat')
+        self.dense = keras.layers.Dense(hidden_units)
 
     def call(self, x, state):
         x = self.embedding(x)
         enc_seq, fs, bs = self.bi_gru(x, state)
-
+        enc_seq = self.dense(enc_seq)
         enc_state = keras.layers.Add()([fs, bs])
         return enc_seq, enc_state
 
