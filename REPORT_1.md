@@ -41,7 +41,7 @@
       - ![img.png](result/attention/attention3.png)
 
 6. Kết quả khi dịch một số câu:
-   ![img.png](img.png)
+   ![img.png](result/translated/img.png)
    ![img_1.png](result/translated/img_1.png) 
    ![img_2.png](result/translated/img_2.png)
    ![img_3.png](result/translated/img_3.png)
