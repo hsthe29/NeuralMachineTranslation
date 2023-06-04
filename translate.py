@@ -1,4 +1,4 @@
-from src.model.processor import Language
+from src.model.language import Language
 from src.model.translator import Translator
 from src.utils import *
 import tensorflow as tf
