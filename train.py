@@ -41,31 +41,31 @@ if __name__ == '__main__':
 
     en_vocab = load_vocab('vocab/vocab.en')
     vi_vocab = load_vocab('vocab/vocab.vi')
-    #
+
     en_lang = Language(en_vocab, signal_tokens, 'en')
     vi_lang = Language(vi_vocab, signal_tokens, 'vi')
-    #
-    # train_en, train_vi = filter_long_pairs(train_en, train_vi, config.train_size)
-    # val_en, val_vi = filter_long_pairs(val_en, val_vi, config.val_size)
-    #
-    # train_raw = make_dataset(train_en, train_vi, batch_size=config.batch_size)
-    # val_raw = make_dataset(val_en, val_vi, batch_size=config.batch_size)
-    #
-    # train_ds = train_raw.map(convert_dataset, tf.data.AUTOTUNE)
-    # val_ds = val_raw.map(convert_dataset, tf.data.AUTOTUNE)
-    #
-    # model = Translator(en_processor, vi_processor, config)
-    #
-    # model.compile(optimizer=tf.optimizers.Adam(config.optimizer['adam']['lr'],
-    #                                            config.optimizer['adam']['beta_1'],
-    #                                            config.optimizer['adam']['beta_2']),
-    #               loss=MaskedLoss(),
-    #               metrics=[masked_acc])
-    # checkpoint = get_checkpoint(config.ckpt_dir)
-    # history = model.fit(train_ds,
-    #                     epochs=config.epochs,
-    #                     validation_data=val_ds,
-    #                     callbacks=[checkpoint,
-    #                                tf.keras.callbacks.EarlyStopping(patience=5)])
 
-    # plot_history(history)
+    train_en, train_vi = filter_long_pairs(train_en, train_vi, config.train_size)
+    val_en, val_vi = filter_long_pairs(val_en, val_vi, config.val_size)
+
+    train_raw = make_dataset(train_en, train_vi, batch_size=config.batch_size)
+    val_raw = make_dataset(val_en, val_vi, batch_size=config.batch_size)
+
+    train_ds = train_raw.map(convert_dataset, tf.data.AUTOTUNE)
+    val_ds = val_raw.map(convert_dataset, tf.data.AUTOTUNE)
+
+    model = Translator(en_lang, vi_lang, config)
+
+    model.compile(optimizer=tf.optimizers.Adam(config.optimizer['adam']['lr'],
+                                               config.optimizer['adam']['beta_1'],
+                                               config.optimizer['adam']['beta_2']),
+                  loss=MaskedLoss(),
+                  metrics=[masked_acc])
+    checkpoint = get_checkpoint(config.ckpt_dir)
+    history = model.fit(train_ds,
+                        epochs=config.epochs,
+                        validation_data=val_ds,
+                        callbacks=[checkpoint,
+                                   tf.keras.callbacks.EarlyStopping(patience=5)])
+
+    plot_history(history)

@@ -11,8 +11,8 @@ class Translator(keras.Model):
                  target_processor, config):
         super(Translator, self).__init__()
 
-        embedding_size = config['embedding_size']
-        units = config['recurrent_units']
+        embedding_size = config.embedding_size
+        units = config.recurrent_units
         # Build the encoder and decoder
         self.encoder = Encoder(source_processor.vocab_size, embedding_size, units)
         self.decoder = Decoder(target_processor.vocab_size, embedding_size, units)
@@ -21,10 +21,10 @@ class Translator(keras.Model):
         self.target_processor = target_processor
 
         self.index_from_string = tf.keras.layers.StringLookup(
-            vocabulary=self.target_processor.vocab, mask_token=config['mask_token'])
-        token_mask_ids = self.index_from_string([config['mask_token'],
-                                                 config['oov_token'],
-                                                 config['start_token']]).numpy()
+            vocabulary=self.target_processor.vocab, mask_token=config.mask_token)
+        token_mask_ids = self.index_from_string([config.mask_token,
+                                                 config.oov_token,
+                                                 config.start_token]).numpy()
 
         self.token_mask = np.zeros([self.index_from_string.vocabulary_size()], bool)
         self.token_mask[np.array(token_mask_ids)] = True
