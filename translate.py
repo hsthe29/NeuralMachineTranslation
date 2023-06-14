@@ -66,7 +66,7 @@ class TranslateServer(BaseHTTPRequestHandler):
         target_text = translate(model, post_data['text'])
         response_data = {
             'lang': 'vi',
-            'text': target_text.decode()
+            'text': target_text.decode().capitalize()
         }
         response_data = json.dumps(response_data).encode('utf=8')
         self._set_response()
