@@ -4,6 +4,10 @@ body{
     background-color: #ffffff;
 }
 
+textarea{
+    font-size: 18px;
+}
+
 .box { 
     border: none;
     column-gap: 20px;
