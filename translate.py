@@ -1,12 +1,14 @@
 import json
 import os
 import time
+import tensorflow as tf
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from io import BytesIO
 from src.model.language import Language
 from src.model.translator import Translator
 from src.utils import *
 import sys
+import webbrowser
 
 HOST_NAME = 'localhost'
 PORT = 8000
@@ -76,6 +78,8 @@ class TranslateServer(BaseHTTPRequestHandler):
 def translate(pretrained_model, text):
     result = pretrained_model.translate(text, max_len=50)
     result_texts = result['text']
+    result_texts = tf.strings.regex_replace(result_texts, '_', ' ')
+    result_texts = tf.strings.regex_replace(result_texts, r'(\s+)([.,])', r'\2')
     return result_texts[0].numpy()
 
 
@@ -85,6 +89,7 @@ if __name__ == "__main__":
     httpd = HTTPServer((HOST_NAME, PORT), TranslateServer)
     print(time.asctime(), "Start Server - %s:%s" % (HOST_NAME, PORT))
     try:
+        webbrowser.open(f'http://{HOST_NAME}:{PORT}', new=0)
         httpd.serve_forever()
     except KeyboardInterrupt:
         pass
