@@ -1,6 +1,7 @@
-import numpy as np
 import tensorflow as tf
 from src.utils import normalize_en, normalize_vi
+
+__all__ = ['load_dataset', 'preprocess_data', 'filter_long_pairs', 'make_dataset', ]
 
 
 def load_dataset(path):

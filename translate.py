@@ -1,68 +1,92 @@
+import json
+import os
+import time
+from http.server import HTTPServer, BaseHTTPRequestHandler
+from io import BytesIO
 from src.model.language import Language
 from src.model.translator import Translator
 from src.utils import *
-import tensorflow as tf
-from src.losses import *
-from src.metrics import *
-import yaml
+import sys
 
-if __name__ == "__main__":
-    with open("config.py") as f:
-        config = yaml.load(f, Loader=yaml.SafeLoader)
+HOST_NAME = 'localhost'
+PORT = 8000
 
-    checkpoint_filepath = 'checkpoint/translator_v1.tf'
 
+def load_model(ckpt):
     en_vocab = load_vocab('vocab/vocab.en')
     vi_vocab = load_vocab('vocab/vocab.vi')
 
-    special_tokens = get_special_tokens(config)
+    special_tokens = get_special_tokens()
 
     en_processor = Language(en_vocab, special_tokens, lang='en')
     vi_processor = Language(vi_vocab, special_tokens, lang='vi')
 
-    pre_model = Translator(en_processor, vi_processor, config)
-    pre_model.load_weights(checkpoint_filepath)
+    pretrained_model = Translator(en_processor, vi_processor, config)
+    pretrained_model.load_weights(ckpt)
+    print('create')
+    return pretrained_model
 
-    # dev = load_dataset(config['dev_en'])
-    # normalize(dev)
-    # samples = []
-    #
-    # indexes = np.random.choice(np.arange(len(dev)), size=10)
-    #
-    # for index in indexes:
-    #     samples.append(dev[index])
 
-    # for sentence in samples:
-    #     print('en:', sentence)
-    #     result = pre_model.translate(sentence, max_len=40)
-    #     result_texts = result['text']
-    #     pred_sentence = result_texts[0].numpy().decode()
-    #     print('vi:', pred_sentence)
-    #     print()
+class TranslateServer(BaseHTTPRequestHandler):
+    def _set_response(self):
+        self.send_response(200)
+        self.end_headers()
 
-    # samples = ["check off the things you accomplish each day , and reflect on how you feel afterwards ."]
-    #
-    samples = ["we do n't talk anymore like we used to do .",
-               "Recently, the potential limit has been increased yet again through heat assisted magnetic recording .",
-               "He enters the roots through a tiny slit in search of food",
-               "i also did n't know that the second step is to isolate the victim",
-               "but most people do n't agree",
-               "this was the first time i heard that people in my country were suffering",
-               "And I want to talk through some examples today of things that people have done that I think are "
-               "really fascinating using flexible identity and anonymity on the web and blurring the lines between "
-               "fact and fiction .",
-               "And the reason why I bring up radio is that I think radio is a great example of how a new medium ",
-               "And, defines new formats which then define new stories ."]
-    for sentence in samples:
-        print('en: ', sentence)
-        sentence = en_processor.preprocess(sentence)
-        result = pre_model.translate(sentence, max_len=50)
-        result_texts = result['text']
-        pred_sentence = result_texts[0].numpy().decode()
-        print('vi: ', pred_sentence)
-        print()
-    #
-    # result = pre_model.translate(sentence, max_len=40)
-    # result_texts = result['text']
-    attentions = result['attention']
-    visualize_attention(attentions[-1], samples[-1], result_texts[0])
+    def do_GET(self):
+        print('path', self.path)
+        if self.path == '/':
+            self.path = '/index.html'
+        try:
+            split_path = os.path.splitext(self.path)
+            request_extension = split_path[1]
+            print(split_path)
+            if request_extension != ".py":
+                f = open('src/ui' + self.path).read()
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(bytes(f, 'utf-8'))
+                print('done')
+            else:
+                f = "File not found" + ''.join(split_path)
+                self.send_error(404, f)
+
+        except Exception:
+            f = "File not found"
+            self.send_error(404, f)
+
+    def do_POST(self):
+        content_length = int(self.headers['Content-Length'])  # <--- Gets the size of data
+        post_data = self.rfile.read(content_length)  # <--- Gets the data itself
+        if post_data == b'terminate':
+            print('Session terminating...')
+            sys.exit(0)
+        post_data = json.loads(post_data.decode())
+        target_text = translate(model, post_data['text'])
+        response_data = {
+            'lang': 'vi',
+            'text': target_text.decode()
+        }
+        response_data = json.dumps(response_data).encode('utf=8')
+        self._set_response()
+        response = BytesIO()
+        response.write(response_data)
+        self.wfile.write(response.getvalue())
+
+
+def translate(pretrained_model, text):
+    result = pretrained_model.translate(text, max_len=50)
+    result_texts = result['text']
+    return result_texts[0].numpy()
+
+
+if __name__ == "__main__":
+    model = load_model('checkpoint/translator_v1.tf')
+
+    httpd = HTTPServer((HOST_NAME, PORT), TranslateServer)
+    print(time.asctime(), "Start Server - %s:%s" % (HOST_NAME, PORT))
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        pass
+    httpd.server_close()
+    print(time.asctime(), 'Stop Server - %s:%s' % (HOST_NAME, PORT))

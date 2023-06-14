@@ -1,7 +1,6 @@
 import tensorflow as tf
 from tensorflow import keras
 import numpy as np
-
 from src.model.decoder import Decoder
 from src.model.encoder import Encoder
 
@@ -29,8 +28,8 @@ class Translator(keras.Model):
         self.token_mask = np.zeros([self.index_from_string.vocabulary_size()], bool)
         self.token_mask[np.array(token_mask_ids)] = True
 
-        self.start_token = self.index_from_string(tf.constant(config['start_token']))
-        self.end_token = self.index_from_string(tf.constant(config['end_token']))
+        self.start_token = self.index_from_string(tf.constant(config.start_token))
+        self.end_token = self.index_from_string(tf.constant(config.end_token))
 
     def call(self, inputs):
         in_tok, tar_in = inputs
@@ -50,7 +49,7 @@ class Translator(keras.Model):
         y_true = tar_out
 
         with tf.GradientTape() as tape:
-            logits, _ = self.call(tokens)
+            logits, _ = self(tokens, training=True)
             y_pred = logits
             step_loss = self.loss(y_true, y_pred)
 
@@ -72,7 +71,7 @@ class Translator(keras.Model):
         tokens = (in_tok, tar_in)
         y_true = tar_out
 
-        logits, _ = self.call(tokens)
+        logits, _ = self(tokens, training=False)
         y_pred = logits
         step_loss = self.loss(y_true, y_pred)
 
@@ -83,8 +82,9 @@ class Translator(keras.Model):
         return eval_result
 
     def translate(self, input_texts, max_len, temperature=0.0, return_attention=True):
+        print(input_texts)
         input_tokens = self.source_processor.convert_to_tensor(input_texts)
-        input_mask = input_tokens != 0
+        print('inp', input_tokens)
         batch_size = tf.shape(input_tokens)[0]
 
         first_state = self.encoder.init_state(batch_size)
@@ -122,7 +122,7 @@ class Translator(keras.Model):
 
             if tf.executing_eagerly() and tf.reduce_all(done):
                 break
-
+        print( tf.concat(result_tokens, axis=-1))
         result_tokens = tf.concat(result_tokens, axis=-1)
         result_text = self.target_processor.convert_to_text(result_tokens)
 

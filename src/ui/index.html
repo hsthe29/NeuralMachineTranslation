@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Translator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/main.css">
+    <script>
+        function postData() {
+            var data = {
+                lang: 'en',
+                text: document.getElementById('src_text').value
+            }
+        
+            fetch('', {
+                method: 'POST',
+                headers: {
+                'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            }).then(response => response.text())
+                .then(data => document.getElementById('tar_text').value = JSON.parse(data).text)
+                .catch(function(error) {
+                        console.error(error);
+            });
+        }
+
+        function clearAll() {
+            var textarea = document.getElementsByClassName("autoresizing");
+            Array.prototype.forEach.call(textarea, function (text) { 
+                text.value = ""; 
+                text.style.height = 'auto';
+            });
+        }
+
+        function terminateSession() {
+            var data = "terminate"
+
+            fetch('', {
+                method: 'POST',
+                headers: {
+                'Content-Type': 'application/json'
+                },
+                body: data
+            })
+            document.getElementById('term-btn').innerText = "Terminated";
+        }
+      </script>
+</head>
+<body>
+    <h1>English-Vietnamese Translator</h1>
+    <p class="border">
+        <button id="term-btn" class="d-block mr-0 ml-auto" onclick="terminateSession()">Terminate</button>
+    </p>
+    <div class="box">
+        <div>
+            <label>English</label>
+            <br>
+            <textarea id="src_text" name="src_text" class="autoresizing", rows="15" cols="60" placeholder="Enter text"></textarea>
+            <br>
+        </div>
+        <div class="btn-box">
+            <button onclick="postData()">Translate</button>
+            <button onclick="clearAll()">Clear all</button>
+        </div>
+
+        <div>
+            <label>Vietnamese</label>
+            <br>
+            <textarea id="tar_text" name="tar_text" class="autoresizing", rows="15" cols="60" placeholder="Enter text"></textarea>
+            <br>
+        </div>
+    </div>
+    <script type="text/javascript">
+        var textarea = document.getElementsByClassName("autoresizing");
+        Array.prototype.forEach.call(textarea, text =>
+            text.addEventListener('input', autoResize, false)
+        );
+
+        function autoResize() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        }
+    </script>
+</body>
+</html>

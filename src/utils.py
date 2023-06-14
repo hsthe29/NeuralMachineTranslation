@@ -1,8 +1,8 @@
 import re
+import tensorflow as tf
 from matplotlib import pyplot as plt
 from matplotlib import ticker
 from underthesea import word_tokenize
-from src.dataset import *
 import config
 
 
@@ -66,14 +66,41 @@ def normalize_vi(text):
     return normalized_text
 
 
-def normalize_en_tf(text):
-    text = text.numpy().decode()
-    return normalize_en(text)
+def text_normalize_en(texts):
+    texts = tf.strings.lower(texts, encoding='utf-8')
+    texts = tf.strings.regex_replace(texts, r'''[^ a-z0-9.?!,'":-]''', '')
+    texts = tf.strings.regex_replace(texts, r'(\d+\.\d+|\d+)([a-z])', r'\1 \2')
+    texts = tf.strings.regex_replace(texts, r'([a-z])(\d+\.\d+|\d+)', r'\1 \2')
+    texts = tf.strings.regex_replace(texts, r'(\d+\.\d+|\d+?|[a-z])([.,])', r'\1 \2 ')
+
+    texts = tf.strings.strip(texts)
+
+    texts = tf.strings.join(['[sos]', texts, '[eos]'], separator=' ')
+    return texts
 
 
-def normalize_vi_tf(text):
-    text = text.numpy().decode()
-    return normalize_vi(text)
+def text_normalize_vi(texts):
+    texts = tf.strings.lower(texts, encoding='utf-8')
+    texts = tf.strings.regex_replace(
+        texts,
+        r'''[^ aăâáắấàằầảẳẩãẵẫạặậđeêéếèềẻểẽễẹệiíìỉĩịoôơóốớòồờỏổởõỗỡọộợuưúứùừủửũữụựyýỳỷỹỵa-z0-9.?!,'":-_]''',
+        '')
+    texts = tf.strings.regex_replace(
+        texts,
+        r'''(\d+\.\d+|\d+)([aăâáắấàằầảẳẩãẵẫạặậđeêéếèềẻểẽễẹệiíìỉĩịoôơóốớòồờỏổởõỗỡọộợuưúứùừủửũữụựyýỳỷỹỵa-z])''',
+        r'\1 \2')
+    texts = tf.strings.regex_replace(
+        texts,
+        r'''([aăâáắấàằầảẳẩãẵẫạặậđeêéếèềẻểẽễẹệiíìỉĩịoôơóốớòồờỏổởõỗỡọộợuưúứùừủửũữụựyýỳỷỹỵa-z])(\d+\.\d+|\d+)''',
+        r'\1 \2')
+    texts = tf.strings.regex_replace(
+        texts,
+        r'''(\d+\.\d+|\d+?|[aăâáắấàằầảẳẩãẵẫạặậđeêéếèềẻểẽễẹệiíìỉĩịoôơóốớòồờỏổởõỗỡọộợuưúứùừủửũữụựyýỳỷỹỵa-z])([.,])''',
+        r'\1 \2 ')
+    texts = tf.strings.strip(texts)
+
+    texts = tf.strings.join(['[sos]', texts, '[eos]'], separator=' ')
+    return texts
 
 
 def add_spaces(text):
@@ -81,22 +108,6 @@ def add_spaces(text):
     text = re.sub(r'([a-zA-Z])(\d+\.\d+|\d+)', r'\1 \2', text)
     text = re.sub(r'(?<!\d\.\d)([.,])(?!\d)', r' \1 ', text)
     return text
-
-
-def text_normalize_en(texts):
-    # Add spaces around punctuation.
-    texts = tf.map_fn(fn=normalize_en_tf, elems=texts, fn_output_signature=tf.string)
-
-    texts = tf.strings.join(['[sos]', texts, '[eos]'], separator=' ')
-    return texts
-
-
-def text_normalize_vi(texts):
-    # Add spaces around punctuation.
-    texts = tf.map_fn(fn=normalize_vi_tf, elems=texts, fn_output_signature=tf.string)
-
-    texts = tf.strings.join(['[sos]', texts, '[eos]'], separator=' ')
-    return texts
 
 
 def get_special_tokens():
