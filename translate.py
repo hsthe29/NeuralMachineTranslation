@@ -1,10 +1,9 @@
 import json
 import os
 import time
-import tensorflow as tf
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from io import BytesIO
-from src.model.language import Language
+from src.language import Language
 from src.model.translator import Translator
 from src.utils import *
 import sys

@@ -1,5 +1,5 @@
 from tensorflow import keras
-from src.model.attention import Attention
+from src.model.rnn.attention import Attention
 
 
 class Decoder(keras.layers.Layer):

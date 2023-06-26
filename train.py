@@ -1,9 +1,8 @@
 from src.dataset import *
 from src.losses import *
 from src.metrics import *
-from src.model.language import Language
+from src.language import Language
 from src.model.translator import Translator
-import tensorflow as tf
 from src.utils import *
 import config
 

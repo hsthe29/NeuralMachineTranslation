@@ -5,9 +5,9 @@ from tensorflow import keras
 class Attention(keras.layers.Layer):
     def __init__(self, units, **kwargs):
         super().__init__()
-        self.mha = tf.keras.layers.MultiHeadAttention(key_dim=units, num_heads=3, **kwargs)
-        self.layernorm = tf.keras.layers.LayerNormalization()
-        self.add = tf.keras.layers.Add()
+        self.mha = keras.layers.MultiHeadAttention(key_dim=units, num_heads=3, **kwargs)
+        self.norm = keras.layers.LayerNormalization()
+        self.add = keras.layers.Add()
 
     def call(self, query, value):
         attn_output, attn_scores = self.mha(
