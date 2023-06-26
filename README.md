@@ -15,3 +15,15 @@ It is a Encoder-Decoder architecture, in which the Encoder takes the input featu
 4. For training: `$ python train.py`
 5. For testing (evaluate metrics): `$ python test.py`
 6. Using trained model to translate: `translate(texts)` in file [translate.py](translate.py)
+
+## Evaluation
+### Result
+
+### BLEU Score
+- I use Google Colaboratory to train and test model, so i will update BLEU metrics into this project
+
+Model | BLEU
+:---: | :---:
+RNN | 19.425
+Transformer | 21.374
+- **Note:** I still update model until my model get best score
