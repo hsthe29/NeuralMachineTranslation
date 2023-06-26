@@ -172,6 +172,11 @@ def tokenize_vi(text):
     return text
 
 
+def create_look_ahead_mask(size):
+    mask = 1 - tf.linalg.band_part(tf.ones((size, size)), -1, 0)
+    return mask  # (seq_len, seq_len)
+
+
 def save_vocabulary(vocab, file_path):
     with open(file_path, 'w', encoding='utf-8') as f:
         for word in vocab:
