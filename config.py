@@ -1,7 +1,7 @@
 model = "Neural Machine Translator"
 # "./data/normalized/train/train_normalized.en"
 train_data = "path to train folder"
-dev_data = "path to dev folder"
+dev_data = r"D:/Dataset/PhoMT/tokenization/dev/"
 test_data = "path to test folder"
 
 reversed_name = "./data/normalized/reserved_names.txt"

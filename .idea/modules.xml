@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/EncoderDecoder-NMT.iml" filepath="$PROJECT_DIR$/.idea/EncoderDecoder-NMT.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/NeuralMachineTranslation.iml" filepath="$PROJECT_DIR$/.idea/NeuralMachineTranslation.iml" />
     </modules>
   </component>
 </project>

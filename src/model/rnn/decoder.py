@@ -10,7 +10,7 @@ class Decoder(keras.layers.Layer):
 
         self.embedding_size = embedding_size
         self.units = units
-
+        print("decoder: ", vocab_size)
         # 1. The embedding layer converts token IDs to vectors
         self.embedding = keras.layers.Embedding(self.vocab_size,
                                                 embedding_size, mask_zero=True)
@@ -28,6 +28,20 @@ class Decoder(keras.layers.Layer):
 
     def call(self, x, enc_output, state=None):
         # 1. Lookup the embeddings
+        x = self.embedding(x)
+        # 2. Process the target sequence.
+        query, _ = self.gru(x, initial_state=state)
+        # 3. Use the GRU output as the query for the attention over the context.
+        context_vector, attention_weights = self.attention(query=query, value=enc_output)
+        self.attention_weights = attention_weights
+        # Step 5. Generate logit predictions:
+        logits = self.output_layer(context_vector)
+
+        return logits
+
+    def predict_with_state(self, x, enc_output, state=None):
+        # 1. Lookup the embeddings
+        print(x.shape)
         x = self.embedding(x)
         # 2. Process the target sequence.
         query, state = self.gru(x, initial_state=state)

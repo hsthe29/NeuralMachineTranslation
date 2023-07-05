@@ -16,11 +16,8 @@ class TranslatorTrainer(keras.Model):
         self.encoder = Encoder(source_processor.vocab_size, embedding_size, units)
         self.decoder = Decoder(target_processor.vocab_size, embedding_size, units)
 
-        self.source_processor = source_processor
-        self.target_processor = target_processor
-
         self.index_from_string = tf.keras.layers.StringLookup(
-            vocabulary=self.target_processor.vocab, mask_token=config.mask_token)
+            vocabulary=target_processor.vocab, mask_token=config.mask_token)
         token_mask_ids = self.index_from_string([config.mask_token,
                                                  config.oov_token,
                                                  config.start_token]).numpy()
@@ -37,32 +34,25 @@ class TranslatorTrainer(keras.Model):
         first_state = self.encoder.init_state(batch_size)
         enc_output, enc_state = self.encoder(in_tok, first_state)
 
-        logits, dec_state = self.decoder(tar_in, enc_output, state=enc_state)
-        return logits, dec_state
+        logits = self.decoder(tar_in, enc_output, state=enc_state)
+        return logits
 
-    def translate(self, input_texts, max_len, temperature=0.0, return_attention=True):
-        print(input_texts)
-        input_tokens = self.source_processor.convert_to_tensor(input_texts)
-        print('inp', input_tokens)
-        batch_size = tf.shape(input_tokens)[0]
+    def predict_tokens(self, inputs, max_len, temperature=0.0):
+        batch_size = tf.shape(inputs)[0]
 
         first_state = self.encoder.init_state(batch_size)
-        enc_output, enc_state = self.encoder(input_tokens, first_state)
+        enc_output, enc_state = self.encoder(inputs, first_state)
         dec_state = enc_state
 
         in_tokens = tf.reshape(tf.cast([self.start_token.numpy()] * batch_size.numpy(), tf.int64), shape=(-1, 1))
 
-        result_tokens = []
-        attention = []
+        result_array = tf.TensorArray(dtype=tf.int64, size=0, dynamic_size=True)
+        attn_array = tf.TensorArray(dtype=tf.float32, size=0, dynamic_size=True)
         done = tf.zeros([batch_size, 1], dtype=bool)
 
-        for _ in tf.range(max_len):
-            # Pass in two tokens from the target sequence:
-            # 1. The current input to the decoder.
-            # 2. The target for the decoder's next prediction.
-
-            logits, dec_state = self.decoder(in_tokens, enc_output, state=dec_state)
-            attention.append(self.decoder.attention_weights)
+        for i in tf.range(max_len):
+            logits, dec_state = self.decoder.predict_with_state(in_tokens, enc_output, state=dec_state)
+            attn_array = attn_array.write(i, tf.squeeze(self.decoder.attention_weights))
             token_mask = self.token_mask[tf.newaxis, tf.newaxis, :]
 
             # Set the logits for all masked tokens to -inf, so they are never chosen.
@@ -72,21 +62,17 @@ class TranslatorTrainer(keras.Model):
                 new_tokens = tf.argmax(logits, axis=-1)
             else:
                 logits = tf.squeeze(logits, axis=1)
-                new_tokens = tf.random.categorical(logits / temperature,
-                                                   num_samples=1)
+                new_tokens = tf.random.categorical(logits / temperature, num_samples=1)
+
             done = done | (new_tokens == self.end_token)
             in_tokens = tf.where(done, tf.constant(0, dtype=tf.int64), new_tokens)
-
-            result_tokens.append(in_tokens)
+            result_array = result_array.write(i, in_tokens[0])
 
             if tf.executing_eagerly() and tf.reduce_all(done):
                 break
-        print( tf.concat(result_tokens, axis=-1))
-        result_tokens = tf.concat(result_tokens, axis=-1)
-        result_text = self.target_processor.convert_to_text(result_tokens)
 
-        if return_attention:
-            attention_stack = tf.concat(attention, axis=1)
-            return {'text': result_text, 'attention': attention_stack}
-        else:
-            return {'text': result_text}
+        result_tokens = tf.transpose(result_array.stack())
+        attention_stack = attn_array.stack()
+        # result_text = self.target_processor.convert_to_text(result_tokens)
+
+        return result_tokens, attention_stack

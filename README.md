@@ -2,10 +2,11 @@
 
 ## Overview
 ### Dataset
-I used the dataset [PhoMT](https://github.com/VinAIResearch/PhoMT) from VinAIResearch. PhoMT is a high-quality and large-scale Vietnamese-English parallel dataset of 3.02M sentence pairs. For my project, I used training consist of 400K of 2.9M sentence pairs from `train.en` and `train.vi`. The validation set is taken from `dev.en` and `dev.vi` (15K pairs), test set is from `test.en` and `test.vi` (almost 20K pairs).
+I used the dataset [PhoMT](https://github.com/VinAIResearch/PhoMT) from VinAIResearch. PhoMT is a high-quality and large-scale Vietnamese-English parallel dataset of 3.02M sentence pairs. For my project, I used training consist of 1M of 2.9M sentence pairs from `train.en` and `train.vi`. The validation set is taken from `dev.en` and `dev.vi` (15K pairs), test set is from `test.en` and `test.vi` (almost 20K pairs).
 
 ### Seq2seq model
-It is a Encoder-Decoder architecture, in which the Encoder takes the input features and passes its output to the first RNN unit of the Decoder. The Decoder will generate sentences word by word. Here is a simple illustration of the Seq2seq model:
+- Using RNN
+- Using Transformer
 
 
 ## Run project

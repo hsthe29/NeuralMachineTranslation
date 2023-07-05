@@ -17,6 +17,6 @@ class Attention(keras.layers.Layer):
 
         attn_scores = tf.reduce_mean(attn_scores, axis=1)
         x = self.add([query, attn_output])
-        x = self.layernorm(x)
+        x = self.norm(x)
 
         return x, attn_scores

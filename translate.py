@@ -5,6 +5,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from io import BytesIO
 from src.language import Language
 from src.model.translator import Translator
+from src.model.rnn.translator_trainer import TranslatorTrainer
 from src.utils import *
 import sys
 import webbrowser
@@ -13,7 +14,7 @@ HOST_NAME = 'localhost'
 PORT = 8000
 
 
-def load_model(ckpt):
+def load_translator(ckpt):
     en_vocab = load_vocab('vocab/vocab.en')
     vi_vocab = load_vocab('vocab/vocab.vi')
 
@@ -22,10 +23,11 @@ def load_model(ckpt):
     en_processor = Language(en_vocab, special_tokens, lang='en')
     vi_processor = Language(vi_vocab, special_tokens, lang='vi')
 
-    pretrained_model = Translator(en_processor, vi_processor, config)
+    pretrained_model = TranslatorTrainer(en_processor, vi_processor, config)
     pretrained_model.load_weights(ckpt)
-    print('create')
-    return pretrained_model
+    translator = Translator(en_processor, vi_processor, pretrained_model)
+    print('Translator has been created')
+    return translator
 
 
 class TranslateServer(BaseHTTPRequestHandler):
@@ -62,7 +64,7 @@ class TranslateServer(BaseHTTPRequestHandler):
             print('Session terminating...')
             sys.exit(0)
         post_data = json.loads(post_data.decode())
-        target_text = translate(model, post_data['text'])
+        target_text = translate(post_data['text'])
         response_data = {
             'lang': 'vi',
             'text': target_text.decode().capitalize()
@@ -74,16 +76,15 @@ class TranslateServer(BaseHTTPRequestHandler):
         self.wfile.write(response.getvalue())
 
 
-def translate(pretrained_model, text):
-    result = pretrained_model.translate(text, max_len=50)
-    result_texts = result['text']
-    result_texts = tf.strings.regex_replace(result_texts, '_', ' ')
-    result_texts = tf.strings.regex_replace(result_texts, r'(\s+)([.,])', r'\2')
-    return result_texts[0].numpy()
+def translate(text):
+    result = translator(text, max_length=100)
+    result = tf.strings.regex_replace(result, '_', ' ')
+    result = tf.strings.regex_replace(result, r'(\s+)([.,])', r'\2')
+    return result[0].numpy()
 
 
 if __name__ == "__main__":
-    model = load_model('checkpoint/translator_v1.tf')
+    translator = load_translator('checkpoint/model_weights_v1.tf')
 
     httpd = HTTPServer((HOST_NAME, PORT), TranslateServer)
     print(time.asctime(), "Start Server - %s:%s" % (HOST_NAME, PORT))

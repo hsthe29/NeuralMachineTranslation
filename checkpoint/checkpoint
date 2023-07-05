@@ -1,2 +1,2 @@
-model_checkpoint_path: "translator_v1.tf"
-all_model_checkpoint_paths: "translator_v1.tf"
+model_checkpoint_path: "model_weights_v1.tf"
+all_model_checkpoint_paths: "model_weights_v1.tf"

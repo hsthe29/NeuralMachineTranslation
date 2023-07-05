@@ -43,6 +43,8 @@ if __name__ == '__main__':
 
     en_lang = Language(en_vocab, signal_tokens, 'en')
     vi_lang = Language(vi_vocab, signal_tokens, 'vi')
+    ~~>  +++ 012332▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▀ ▔ ▏ ▎ ▍ ▌ ▋ ▊ ▉ ▐ ▕ ▖ ▗ ▘ ▙ ▚ ▛ ▜ ▝ ▞ ▟ ░ ▒ ▓      
+    Hồ Sỹ Thế
 
     train_en, train_vi = filter_long_pairs(train_en, train_vi, config.train_size)
     val_en, val_vi = filter_long_pairs(val_en, val_vi, config.val_size)
