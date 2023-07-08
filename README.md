@@ -6,10 +6,40 @@ I used the dataset [PhoMT](https://github.com/VinAIResearch/PhoMT) from VinAIRes
 
 ### Seq2seq model
 - Using RNN 
-- Orinial: 
-  - Reference: [Google Tensorflow Example](https://www.tensorflow.org/text/tutorials/nmt_with_attention)
-- Modify:
-  - Encoder: ![encoder.png](pictures/encoder.png)
+- Orinial: Reference: [Google Tensorflow Example](https://www.tensorflow.org/text/tutorials/nmt_with_attention)
+### Modify:
+#### Encoder
+![encoder.png](pictures/encoder.png)
+#### Attention
+![attention.png](pictures/attention.png)
+#### Decoder
+coming soon
+
+## Training
+- Optimizer: Adam optimizer
+- Leaning rate: initialize 1e-3, and decreased by 0.1 times every epoch
+- ```
+  history = model.fit(train_ds.repeat(), 
+                      epochs=50, 
+                      steps_per_epoch = 2500, 
+                      validation_data=val_ds, 
+                      validation_steps=100), 
+                      callbacks=[early_stopping, checkpoint])```
+- In training phase, 
+
+## Inference
+
+## Result
+### BLEU Score
+- I use Google Colaboratory to train and test model, so i will update BLEU metrics into this project
+
+Model | BLEU
+:---: | :---:
+RNN | 19.425
+- **Note:** I still update model until my model get best score
+
+### Examples
+
 
 ## Run project
 1. Install required packages: `$ ./run_build.sh` or `$ bash run_build.sh`
@@ -18,14 +48,3 @@ I used the dataset [PhoMT](https://github.com/VinAIResearch/PhoMT) from VinAIRes
 4. For training: `$ python train.py`
 5. For testing (evaluate metrics): `$ python test.py`
 6. Using trained model to translate: `translate(texts)` in file [translate.py](translate.py)
-
-## Evaluation
-### Result
-
-### BLEU Score
-- I use Google Colaboratory to train and test model, so i will update BLEU metrics into this project
-
-Model | BLEU
-:---: | :---:
-RNN | 19.425
-- **Note:** I still update model until my model get best score
