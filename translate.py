@@ -5,7 +5,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from io import BytesIO
 from src.language import Language
 from src.model.translator import Translator
-from src.model.rnn.translator_trainer import TranslatorTrainer
+from src.model.rnn.nmt import TranslatorTrainer
 from src.utils import *
 import sys
 import webbrowser
@@ -86,12 +86,12 @@ def translate(text):
 if __name__ == "__main__":
     translator = load_translator('checkpoint/model_weights_v1.tf')
 
-    httpd = HTTPServer((HOST_NAME, PORT), TranslateServer)
-    print(time.asctime(), "Start Server - %s:%s" % (HOST_NAME, PORT))
-    try:
-        webbrowser.open(f'http://{HOST_NAME}:{PORT}', new=0)
-        httpd.serve_forever()
-    except KeyboardInterrupt:
-        pass
-    httpd.server_close()
-    print(time.asctime(), 'Stop Server - %s:%s' % (HOST_NAME, PORT))
+    # httpd = HTTPServer((HOST_NAME, PORT), TranslateServer)
+    # print(time.asctime(), "Start Server - %s:%s" % (HOST_NAME, PORT))
+    # try:
+    #     webbrowser.open(f'http://{HOST_NAME}:{PORT}', new=0)
+    #     httpd.serve_forever()
+    # except KeyboardInterrupt:
+    #     pass
+    # httpd.server_close()
+    # print(time.asctime(), 'Stop Server - %s:%s' % (HOST_NAME, PORT))
