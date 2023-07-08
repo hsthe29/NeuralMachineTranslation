@@ -5,9 +5,11 @@
 I used the dataset [PhoMT](https://github.com/VinAIResearch/PhoMT) from VinAIResearch. PhoMT is a high-quality and large-scale Vietnamese-English parallel dataset of 3.02M sentence pairs. For my project, I used training consist of 1M of 2.9M sentence pairs from `train.en` and `train.vi`. The validation set is taken from `dev.en` and `dev.vi` (15K pairs), test set is from `test.en` and `test.vi` (almost 20K pairs).
 
 ### Seq2seq model
-- Using RNN
-- Using Transformer
-
+- Using RNN 
+- Orinial: 
+  - Reference: [Google Tensorflow Example](https://www.tensorflow.org/text/tutorials/nmt_with_attention)
+- Modify:
+  - Encoder: ![encoder.png](pictures/encoder.png)
 
 ## Run project
 1. Install required packages: `$ ./run_build.sh` or `$ bash run_build.sh`
@@ -26,5 +28,4 @@ I used the dataset [PhoMT](https://github.com/VinAIResearch/PhoMT) from VinAIRes
 Model | BLEU
 :---: | :---:
 RNN | 19.425
-Transformer | 21.374
 - **Note:** I still update model until my model get best score
