@@ -36,9 +36,11 @@ I'm drawing
   ```
 - In training phase:
   - Loss
-    ![loss.png](pictures/loss.png)
+
+![loss.png](pictures/loss.png)
   - Accuracy
-    ![accuracy.png](pictures/accuracy.png)
+
+![accuracy.png](pictures/accuracy.png)
 
 ## Inference
 - In inference phase, 
