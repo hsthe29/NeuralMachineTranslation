@@ -6,6 +6,7 @@
 ,
 -
 :
+...
 a
 a-xít
 a-xít_béo
@@ -530,6 +531,7 @@ bạc
 bạc_hà
 bạc_hà_cay
 bạc_màu
+bạc_phận
 bạch
 bạch_cầu
 bạch_dương
@@ -2444,7 +2446,6 @@ da_đầu
 da_đỏ
 dai
 dai_dẳng
-dan
 dang
 dang_dở
 danh
@@ -3607,6 +3608,7 @@ hoảng_hốt
 hoảng_loạn
 hoảng_sợ
 hoặc
+hoen
 ht
 hun
 hun_khói
@@ -4096,6 +4098,7 @@ hồn
 hồng
 hồng_cầu
 hồng_ngoại
+hồng_nhan
 hồng_quân
 hồng_y
 hổ
@@ -5374,7 +5377,9 @@ lằn
 lặn
 lặn_lội
 lặng
+lặng_im
 lặng_lẽ
+lặng_yên
 lặp
 lặp_lại
 lặp_đi

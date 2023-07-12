@@ -1,22 +1,20 @@
 import tensorflow as tf
 
-from src.utils import text_normalize_en, text_normalize_vi
+from src.utils import preprocess_en, preprocess_vi, add_tokens
 
 
 class Language:
-    def __init__(self, vocabulary, special_tokens, lang):
+    def __init__(self, vocabulary, special_tokens, is_english=True):
         mask_token, oov_token, start_token, end_token = special_tokens
         vocab = [start_token, end_token] + vocabulary
-
-        if lang == 'en':
-            self.preprocess = text_normalize_en
-        elif lang == 'vi':
-            self.preprocess = text_normalize_vi
+        self.is_english = is_english
+        if is_english:
+            self.clean = preprocess_en
         else:
-            raise ValueError("Language is not currently supported!")
+            self.clean = preprocess_vi
 
         self.__word_to_index = tf.keras.layers.TextVectorization(
-            standardize=self.preprocess,
+            standardize=add_tokens,
             vocabulary=vocab,
             ragged=True)
 
@@ -48,3 +46,7 @@ class Language:
     @property
     def vocab(self):
         return self.__word_to_index.get_vocabulary()
+
+    @property
+    def lang(self):
+        return "english" if self.is_english else "vietnamese"

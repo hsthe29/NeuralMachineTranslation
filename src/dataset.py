@@ -1,7 +1,6 @@
 import tensorflow as tf
-from src.utils import normalize_en, normalize_vi
 
-__all__ = ['load_dataset', 'preprocess_data', 'filter_long_pairs', 'make_dataset', ]
+__all__ = ['load_dataset', 'filter_long_pairs', 'make_dataset', ]
 
 
 def load_dataset(path):
@@ -9,18 +8,6 @@ def load_dataset(path):
         sentences = f.readlines()
     print(f"Loaded from {path}: {len(sentences)} sentences")
     return sentences
-
-
-def preprocess_data(sentences, lang):
-    n = len(sentences)
-    if lang == 'en':
-        for i in range(n):
-            sentences[i] = normalize_en(sentences[i])
-    elif lang == 'vi':
-        for i in range(n):
-            sentences[i] = normalize_vi(sentences[i])
-    else:
-        raise ValueError(f"lang: {lang} not supported")
 
 
 def filter_long_pairs(source_sentences, target_sentences, size=None, threshold=40):

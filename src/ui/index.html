@@ -7,12 +7,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/main.css">
     <script>
+        function addRow(src_text, tar_text) {
+            var table = document.getElementById("history-table");
+            var row = table.insertRow(1);
+            var cell1 = row.insertCell(0);
+            var cell2 = row.insertCell(1);
+            cell1.innerHTML = src_text;
+            cell2.innerHTML = tar_text;
+        }
+        function clearTable() {
+            table = document.getElementById("history-table")
+            while(table.rows.length > 1) {
+                table.deleteRow(1)
+            }
+        }
         function postData() {
+            src_text = document.getElementById('src_text').value
             var data = {
                 lang: 'en',
-                text: document.getElementById('src_text').value
+                text: src_text
             }
-        
             fetch('', {
                 method: 'POST',
                 headers: {
@@ -20,7 +34,11 @@
                 },
                 body: JSON.stringify(data)
             }).then(response => response.text())
-                .then(data => document.getElementById('tar_text').value = JSON.parse(data).text)
+                .then(data => {
+                    tar_text = JSON.parse(data).text
+                    document.getElementById('tar_text').value = tar_text
+                    addRow(src_text, tar_text)
+                })
                 .catch(function(error) {
                         console.error(error);
             });
@@ -28,8 +46,8 @@
 
         function clearAll() {
             var textarea = document.getElementsByClassName("autoresizing");
-            Array.prototype.forEach.call(textarea, function (text) { 
-                text.value = ""; 
+            Array.prototype.forEach.call(textarea, function (text) {
+                text.value = "";
                 text.style.height = 'auto';
             });
         }
@@ -50,25 +68,27 @@
 </head>
 <body>
     <h1>English-Vietnamese Translator</h1>
+    <hr class="rounded">
     <p class="border">
-        <button id="term-btn" class="d-block mr-0 ml-auto" onclick="terminateSession()">Terminate</button>
+        <button id="term-btn" class="button-term d-block mr-0 ml-auto" role="button" onclick="terminateSession()">
+              Terminate
+        </button>
     </p>
     <div class="box">
         <div>
-            <label>English</label>
+            <label class="language-name">English</label>
             <br>
             <textarea id="src_text" name="src_text" class="autoresizing" rows="15" cols="60" placeholder="Enter text"></textarea>
             <br>
         </div>
         <div class="btn-box">
-            <button onclick="postData()">Translate</button>
-            <button onclick="clearAll()">Clear all</button>
+            <button class="button" onclick="postData()">Translate</button>
+            <button class="button" onclick="clearAll()">Clear all</button>
         </div>
-
         <div>
-            <label>Vietnamese</label>
+            <label class="language-name">Vietnamese</label>
             <br>
-            <textarea id="tar_text" name="tar_text" class="autoresizing" rows="15" cols="60" placeholder="Enter text" readonly></textarea>
+            <textarea id="tar_text" name="tar_text" class="autoresizing" rows="15" cols="60" placeholder="Translation" readonly></textarea>
             <br>
         </div>
     </div>
@@ -83,5 +103,19 @@
             this.style.height = this.scrollHeight + 'px';
         }
     </script>
+    <hr class="rounded">
+    <div>
+        <h2>History</h2>
+        <button id="clear-his-btn" class="d-block mr-0 ml-auto" onclick="clearTable()">Clear history</button>
+        <div class="table-container">
+            <table id="history-table">
+                <tr>
+                    <th>English</th>
+                    <th>Vietnamese</th>
+                </tr>
+            </table>
+            <hr class="rounded">
+        </div>
+    </div>
 </body>
 </html>

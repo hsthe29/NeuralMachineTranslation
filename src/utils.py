@@ -3,131 +3,65 @@ import tensorflow as tf
 from matplotlib import pyplot as plt
 from matplotlib import ticker
 from underthesea import word_tokenize
-import config
+
+__all__ = ['preprocess_en', 'preprocess_vi', 'get_special_tokens', 'plot_history',
+           'create_look_ahead_mask', 'load_vocab', 'add_tokens', 'build']
 
 
-def make_vocabulary(sentences, vocab_size):
-    word_dict = {}
-
-    with open(config.reversed_name, 'r', encoding='utf-8') as f:
-        reserved_names = f.readlines()
-
-    for i in range(len(reserved_names)):
-        reserved_names[i] = reserved_names[i].strip().casefold()
-    reserved_names = set(reserved_names)
-
-    for sentence in sentences:
-        words = sentence.split()
-        for word in words:
-            if word in reserved_names:
-                continue
-            if bool(re.search(r'\d', word)):
-                continue
-            if word in word_dict.keys():
-                word_dict[word] += 1
-            else:
-                word_dict[word] = 0
-
-    print(f"Found {len(word_dict.keys())} words")
-    print(f"Making dictionary of {vocab_size} words...")
-    sorted_dict = sorted(word_dict.items(), key=lambda x: x[1], reverse=True)[:vocab_size]
-    return list(map(lambda x: x[0], sorted_dict))
-
-
-def load_vocabulary(paths):
-    with open(paths['source'], encoding='utf-8') as f:
-        source_vocab = f.readlines()
-
-    with open(paths['target'], encoding='utf-8') as f:
-        target_vocab = f.readlines()
-
-    source_vocab = list(map(lambda x: x.strip(), source_vocab))
-    target_vocab = list(map(lambda x: x.strip(), target_vocab))
-
-    return source_vocab, target_vocab
-
-
-def normalize_en(text):
+def preprocess_en(text):
     text = text.casefold()
     text = text.strip()
     text = re.sub(r'''[^ a-z0-9.?!,'":-]''', '', text)
+    text = re.sub(r'(\d+)([a-z])', r'\1 \2', text)
+    text = re.sub(r'([a-z])(\d+)', r'\1 \2', text)
+    text = re.sub(r'''([.,?:!-'"])''', r' \1 ', text)
+    text = re.sub(r'(\d+) (\.) (\d+)', r'\1.\3', text)
+    text = re.sub(r'\s+', ' ', text)
+    text = re.sub(r"' m", 'am', text)
+    text = re.sub(r"' ve", 'have', text)
+    text = re.sub(r"' re", 'are', text)
+    text = re.sub(r"won ' t", 'will not', text)
+    text = re.sub(r"can ' t", 'can not', text)
+    # text = re.sub(r"ain ' t", 'aint', text)
+    text = re.sub(r"n ' t", ' not', text)
+    text = re.sub(r"(') (s|d|ll|n)", r'\1\2', text)
+    return text
 
-    normalized_text = add_spaces(text)
-    return normalized_text
 
-
-def normalize_vi(text):
+def preprocess_vi(text):
     text = text.casefold()
     text = text.strip()
     text = re.sub(r'''[^ aăâáắấàằầảẳẩãẵẫạặậđeêéếèềẻểẽễẹệiíìỉĩịoôơóốớòồờỏổởõỗỡọộợuưúứùừủửũữụựyýỳỷỹỵa-z0-9.?!,'":-]''',
                   '', text)
+    text = re.sub(r'(\d+)([aăâáắấàằầảẳẩãẵẫạặậđeêéếèềẻểẽễẹệiíìỉĩịoôơóốớòồờỏổởõỗỡọộợuưúứùừủửũữụựyýỳỷỹỵa-z])',
+                  r'\1 \2', text)
+    text = re.sub(r'([aăâáắấàằầảẳẩãẵẫạặậđeêéếèềẻểẽễẹệiíìỉĩịoôơóốớòồờỏổởõỗỡọộợuưúứùừủửũữụựyýỳỷỹỵa-z])(\d+)',
+                  r'\1 \2', text)
+    text = re.sub(r'''([.,?:!-'"])''', r' \1 ', text)
+    text = re.sub(r'(\d+) (\.) (\d+)', r'\1.\3', text)
+    text = re.sub(r'\s+', ' ', text)
     text = word_tokenize(text, format='text')
-    normalized_text = add_spaces(text)
-    return normalized_text
-
-
-def text_normalize_en(texts):
-    texts = tf.strings.lower(texts, encoding='utf-8')
-    texts = tf.strings.regex_replace(texts, r'''[^ a-z0-9.?!,'":-]''', '')
-    texts = tf.strings.regex_replace(texts, r'(\d+\.\d+|\d+)([a-z])', r'\1 \2')
-    texts = tf.strings.regex_replace(texts, r'([a-z])(\d+\.\d+|\d+)', r'\1 \2')
-    texts = tf.strings.regex_replace(texts, r'(\d+\.\d+|\d+?|[a-z])([.,])', r'\1 \2 ')
-
-    texts = tf.strings.strip(texts)
-
-    texts = tf.strings.join(['[sos]', texts, '[eos]'], separator=' ')
-    return texts
-
-
-def text_normalize_vi(texts):
-    texts = tf.strings.lower(texts, encoding='utf-8')
-    texts = tf.strings.regex_replace(
-        texts,
-        r'''[^ aăâáắấàằầảẳẩãẵẫạặậđeêéếèềẻểẽễẹệiíìỉĩịoôơóốớòồờỏổởõỗỡọộợuưúứùừủửũữụựyýỳỷỹỵa-z0-9.?!,'":-_]''',
-        '')
-    texts = tf.strings.regex_replace(
-        texts,
-        r'''(\d+\.\d+|\d+)([aăâáắấàằầảẳẩãẵẫạặậđeêéếèềẻểẽễẹệiíìỉĩịoôơóốớòồờỏổởõỗỡọộợuưúứùừủửũữụựyýỳỷỹỵa-z])''',
-        r'\1 \2')
-    texts = tf.strings.regex_replace(
-        texts,
-        r'''([aăâáắấàằầảẳẩãẵẫạặậđeêéếèềẻểẽễẹệiíìỉĩịoôơóốớòồờỏổởõỗỡọộợuưúứùừủửũữụựyýỳỷỹỵa-z])(\d+\.\d+|\d+)''',
-        r'\1 \2')
-    texts = tf.strings.regex_replace(
-        texts,
-        r'''(\d+\.\d+|\d+?|[aăâáắấàằầảẳẩãẵẫạặậđeêéếèềẻểẽễẹệiíìỉĩịoôơóốớòồờỏổởõỗỡọộợuưúứùừủửũữụựyýỳỷỹỵa-z])([.,])''',
-        r'\1 \2 ')
-    texts = tf.strings.strip(texts)
-
-    texts = tf.strings.join(['[sos]', texts, '[eos]'], separator=' ')
-    return texts
-
-
-def add_spaces(text):
-    text = re.sub(r'(\d+\.\d+|\d+)([a-zA-Z])', r'\1 \2', text)
-    text = re.sub(r'([a-zA-Z])(\d+\.\d+|\d+)', r'\1 \2', text)
-    text = re.sub(r'(?<!\d\.\d)([.,])(?!\d)', r' \1 ', text)
     return text
 
 
 def get_special_tokens():
-    return config.mask_token, config.oov_token, config.start_token, config.end_token
+    return '', '[UNK]', '[sos]', '[eos]'
 
 
-def visualize_attention(attention, sentence, predicted_sentence):
-    sentence = tf.squeeze(text_normalize_en(sentence)).numpy().decode().split()
-    predicted_sentence = tf.squeeze(text_normalize_vi(predicted_sentence)).numpy().decode().split()[1:]
+def visualize_attention(attention, src_sent, pred_sent):
+    src_sent_normalized = add_tokens(preprocess_en(src_sent)).numpy().decode().split()
+    pred_sent_normaized = add_tokens(pred_sent).numpy().deocde().split()[1:]
     fig = plt.figure(figsize=(10, 10))
     ax = fig.add_subplot(1, 1, 1)
 
-    attention = attention[:len(predicted_sentence), :len(sentence)]
+    attention = attention[:len(pred_sent_normaized), :len(src_sent_normalized)]
 
     ax.matshow(attention, cmap='viridis', vmin=0.0)
 
     fontdict = {'fontsize': 14}
 
-    ax.set_xticklabels([''] + sentence, fontdict=fontdict, rotation=90)
-    ax.set_yticklabels([''] + predicted_sentence, fontdict=fontdict)
+    ax.set_xticklabels([''] + src_sent, fontdict=fontdict, rotation=90)
+    ax.set_yticklabels([''] + pred_sent_normaized, fontdict=fontdict)
 
     ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
     ax.yaxis.set_major_locator(ticker.MultipleLocator(1))
@@ -166,33 +100,24 @@ def plot_history(history, save_img=False):
         plt.show()
 
 
-def tokenize_vi(text):
-    for i in range(len(text)):
-        text[i] = word_tokenize(text[i], format='text')
-    return text
-
-
 def create_look_ahead_mask(size):
     mask = 1 - tf.linalg.band_part(tf.ones((size, size)), -1, 0)
     return mask  # (seq_len, seq_len)
 
 
-def save_vocabulary(vocab, file_path):
-    with open(file_path, 'w', encoding='utf-8') as f:
-        for word in vocab:
-            f.write(word + '\n')
-
-
 def load_vocab(file_path):
     vocab = []
-
     with open(file_path, 'r', encoding='utf-8') as f:
         for line in f:
-            vocab.append(line.strip())
-
+            vocab.append(line.strip().casefold())
     return vocab
 
 
-def update_vocab(corpus, vocab_size, path):
-    vocab = make_vocabulary(corpus, vocab_size)
-    save_vocabulary(vocab, path)
+def add_tokens(texts):
+    texts = tf.strings.join(['[sos]', texts, '[eos]'], separator=' ')
+    return texts
+
+
+def build(model, shape):
+    dummy_inputs = tf.random.uniform(shape)
+    model((dummy_inputs, dummy_inputs), training=False)

@@ -9,6 +9,7 @@ class Translator(tf.Module):
         self.model = model
 
     def __call__(self, sentence, max_length=100):
+        sentence = self.src_language.clean(sentence)
         if not isinstance(sentence, tf.Tensor):
             sentence = tf.convert_to_tensor(sentence)
         if len(sentence.shape) == 0:
@@ -17,5 +18,5 @@ class Translator(tf.Module):
         inputs = self.src_language.convert_to_tensor(sentence)
 
         result_tokens, attention = self.model.predict_tokens(inputs, max_len=max_length)
-        result_text = self.tar_processor.convert_to_text(result_tokens)
+        result_text = self.tar_language.convert_to_text(result_tokens)
         return result_text
