@@ -8,15 +8,15 @@ class Translator(tf.Module):
         self.tar_language = tar_language
         self.model = model
 
-    def __call__(self, sentence, max_length=100):
-        sentence = self.src_language.clean(sentence)
-        if not isinstance(sentence, tf.Tensor):
-            sentence = tf.convert_to_tensor(sentence)
-        if len(sentence.shape) == 0:
-            sentence = sentence[tf.newaxis]
+    def __call__(self, text, max_length=100):
+        cleaned_text = self.src_language.clean(text)
+        if not isinstance(cleaned_text, tf.Tensor):
+            cleaned_text = tf.convert_to_tensor(cleaned_text)
+        if len(cleaned_text.shape) == 0:
+            cleaned_text = cleaned_text[tf.newaxis]
 
-        inputs = self.src_language.convert_to_tensor(sentence)
+        inputs = self.src_language.convert_to_tensor(cleaned_text)
 
         result_tokens, attention = self.model.predict_tokens(inputs, max_len=max_length)
-        result_text = self.tar_language.convert_to_text(result_tokens)
+        result_text = self.tar_language.convert_to_text(result_tokens[0], attention, self.src_language.tokenize(text))
         return result_text

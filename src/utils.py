@@ -22,7 +22,7 @@ def preprocess_en(text):
     text = re.sub(r"' re", 'are', text)
     text = re.sub(r"won ' t", 'will not', text)
     text = re.sub(r"can ' t", 'can not', text)
-    # text = re.sub(r"ain ' t", 'aint', text)
+    text = re.sub(r"ain ' t", 'aint', text)
     text = re.sub(r"n ' t", ' not', text)
     text = re.sub(r"(') (s|d|ll|n)", r'\1\2', text)
     return text

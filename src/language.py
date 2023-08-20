@@ -1,5 +1,5 @@
 import tensorflow as tf
-
+import numpy as np
 from src.utils import preprocess_en, preprocess_vi, add_tokens
 
 
@@ -30,12 +30,22 @@ class Language:
 
         return self.__word_to_index(text).to_tensor()
 
-    def convert_to_text(self, tokens):
-        result_text_tokens = self.__index_to_word(tokens)
+    def tokenize(self, text):
+        return tf.strings.split(' '.join(['[sos]', self.clean(text), '[eos]']))
 
-        result_text = tf.strings.reduce_join(result_text_tokens,
-                                             axis=1, separator=' ')
-
+    def convert_to_text(self, tokens, attn_maps, src_words):
+        oovs = tf.where(tokens == 1)
+        word_tokens = self.__index_to_word(tokens)
+        if len(oovs) > 0:
+            a = tf.Variable(np.zeros(tokens.shape, dtype=bool))
+            b = tf.Variable(np.zeros(tokens.shape, dtype=str))
+            for (x) in oovs:
+                index = tf.squeeze(x)
+                a[index].assign(True)
+                bind_id = tf.math.argmax(attn_maps[index])
+                b[index].assign(src_words[bind_id])
+            word_tokens = tf.where(a, b, word_tokens)
+        result_text = tf.strings.reduce_join(word_tokens, separator=' ')
         result_text = tf.strings.strip(result_text)
         return result_text
 

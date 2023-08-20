@@ -11,6 +11,7 @@ from src.model.rnn.nmt import NMT
 from src.utils import *
 import sys
 import webbrowser
+import argparse
 
 HOST_NAME = 'localhost'
 PORT = 8000
@@ -88,11 +89,15 @@ def translate(text):
     result = translator(text, max_length=config.max_length)
     result = tf.strings.regex_replace(result, '_', ' ')
     result = tf.strings.regex_replace(result, r'(\s+)([.,?!])', r'\2')
-    return result[0].numpy()
+    return result.numpy()
 
 
 if __name__ == "__main__":
-    translator = load_translator("saved/model_nmt_lstm.tf")
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--port', type=int, default=8000, help="App's port")
+    args = parser.parse_args()
+    PORT = args.port
+    translator = load_translator("saved/v2/model_weights.ckpt")
 
     httpd = HTTPServer((HOST_NAME, PORT), TranslateServer)
     print(time.asctime(), "Start Server - %s:%s" % (HOST_NAME, PORT))

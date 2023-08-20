@@ -915,6 +915,7 @@ bụi_bặm
 bụng
 bụng_dưới
 bức
+bức_ảnh
 bức_xúc
 bức_xạ
 bức_điện
@@ -1001,9 +1002,6 @@ cao_đẳng
 cao_độ
 cao_ốc
 cara
-carbon
-card
-cartel
 casino
 cassette
 cation
@@ -1011,12 +1009,7 @@ cau
 cau_mày
 cay
 cay_đắng
-cc
-cd
-cd-rom
-cello
 ceo
-ch
 cha
 cha_anh
 cha_dượng
@@ -1305,6 +1298,7 @@ chí_ít
 chích
 chín
 chín_chắn
+chín_mươi
 chính
 chính_danh
 chính_hiệu
@@ -1544,6 +1538,7 @@ chỉ_định
 chỉn_chu
 chỉnh
 chỉnh_hình
+chỉnh_sửa
 chỉnh_tề
 chị
 chị_em
@@ -1685,7 +1680,6 @@ chữa_cháy
 chữa_trị
 cl
 clb
-cleopatra
 clo
 cn
 cnc
@@ -1699,8 +1693,6 @@ co_rút
 co_thắt
 coca
 cocain
-cocktail
-codeine
 coi
 coi_bộ
 coi_chừng
@@ -1742,6 +1734,8 @@ con_đẻ
 cong
 console
 container
+cookie
+cookies
 corpus
 cos
 cotton
@@ -2731,6 +2725,7 @@ dấm
 dấn_thân
 dấu
 dấu_chấm
+dấu_chấm_hỏi
 dấu_chấm_phẩy
 dấu_cộng
 dấu_hiệu
@@ -3215,6 +3210,7 @@ giết_mổ
 giễu_cợt
 giọng
 giọng_hát
+giọng_nói
 giọng_điệu
 giọt
 giỏ
@@ -3247,18 +3243,14 @@ giữ_gìn
 giữa
 giữa_chừng
 giựt
-glucose
-glycerin
 go
 golf
 gom
 gorilla
-gothic
 gps
 gr
 gram
 granit
-greenland
 gs
 gu
 guitar
@@ -3332,6 +3324,7 @@ gạc
 gạch
 gạch_bỏ
 gạch_chéo
+gạch_dưới
 gạch_lát
 gạch_ngang
 gạch_đầu
@@ -3414,7 +3407,6 @@ hai
 hai_chấm
 hai_mươi
 hai_phần_ba
-halloween
 halogen
 ham
 ham_muốn
@@ -3551,7 +3543,6 @@ hollywood
 hong
 hop
 hormon
-hormone
 hotel
 hoài
 hoài_bão
@@ -4217,8 +4208,6 @@ iốt
 k
 ka
 kali
-karaoke
-karate
 ke
 kem
 kem_que
@@ -4892,7 +4881,6 @@ lenin
 leo
 leo_thang
 leo_trèo
-leone
 lhq
 li
 li_dị
@@ -4912,9 +4900,6 @@ linh_thiêng
 linh_tinh
 linh_trưởng
 linh_động
-linux
-lipid
-lithium
 liu
 liu_riu
 liêm_chính
@@ -5224,6 +5209,7 @@ lý_thú
 lý_trí
 lý_tưởng
 lý_tưởng_hóa
+lăm
 lăn
 lăn_lộn
 lăn_tăn
@@ -5769,7 +5755,6 @@ mô_thức
 mô_tô
 mô_tả
 mô_đun
-mô-đun
 môi
 môi_giới
 môi_trường
@@ -5823,15 +5808,19 @@ mưu_sát
 mưu_tính
 mưu_đồ
 mươi
-mươi_lăm
 mương
 mướn
 mướp
 mười
+mười_ba
 mười_bảy
+mười_bốn
+mười_chín
 mười_hai
 mười_lăm
 mười_một
+mười_sáu
+mười_tám
 mường_tượng
 mượn
 mượt
@@ -6248,6 +6237,7 @@ ngoại_đạo
 ngoạn_mục
 ngoặc
 ngoặc_kép
+ngoặc_nhọn
 ngoặc_đơn
 ngu
 ngu_dốt
@@ -7284,7 +7274,6 @@ pe
 pen
 penicillin
 peso
-ph
 pha
 pha_chế
 pha_loãng
@@ -8049,7 +8038,6 @@ riêng_rẽ
 riêng_tư
 ro
 robot
-rock
 rocket
 roi
 rom
@@ -8294,18 +8282,14 @@ scotland
 se
 sen
 seo
-seoul
 seri
 sex
-sexy
 si
 si_mê
 sia
 sigma
 silic
 silica
-silicat
-silicone
 sim
 sin
 sinh
@@ -8760,7 +8744,7 @@ sự_vật
 sỹ
 t
 ta
-taekwondo
+tab
 tai
 tai_biến
 tai_hại
@@ -8812,8 +8796,7 @@ tennis
 teo
 teo_cơ
 test
-tetracycline
-th
+terminal
 tha
 tha_bổng
 tha_hóa
@@ -9944,6 +9927,7 @@ trang_trải
 trang_trọng
 trang_viên
 trang_điểm
+trang_web
 tranh
 tranh_chấp
 tranh_cãi
@@ -11258,7 +11242,6 @@ viện_trợ
 việt
 vo
 voi
-voice
 volt
 von
 vong
@@ -11543,7 +11526,6 @@ vậy
 vậy_mà
 vậy_nên
 vậy_thì
-vắc_-
 vắc_xin
 vắc-xin
 vắn_tắt
@@ -11649,9 +11631,10 @@ vững_vàng
 vực
 vực_thẳm
 vựng
+v.v
 watt
+web
 wiki
-won
 x
 x_quang
 x-quang
@@ -11685,6 +11668,7 @@ xe_hơi
 xe_jeep
 xe_kéo
 xe_lăn
+xe_lu
 xe_lửa
 xe_máy
 xe_ngựa
@@ -11717,7 +11701,6 @@ xiên
 xiếc
 xiết
 xiềng_xích
-xml
 xoa
 xoa_bóp
 xoa_dịu
