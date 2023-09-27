@@ -1,67 +1,46 @@
 # Neural Machine Translation
 
-## Overview
-Mô hình dịch máy dùng LSTM cho Encoder-Decoder
+# Overview
+Implementation and deployment of the machine translation application as a web application
 
-Development: Modify NMT base model: [Link](https://www.tensorflow.org/text/tutorials/nmt_with_attention). See details below.
+This app has 3 Machine Translation models:
+1. RNN based (LSTM): **Available**
+2. Transformer: **Available**
+3. Graph NN: In **development**
 
-### Dataset
-I used the dataset [PhoMT](https://github.com/VinAIResearch/PhoMT) from VinAIResearch. PhoMT is a high-quality and large-scale Vietnamese-English parallel dataset of 3.02M sentence pairs. For my project, I used training consist of 1.28M of 2.9M sentence pairs from `train.en` and `train.vi`. The validation set is taken from `dev.en` and `dev.vi` (15K pairs), test set is from `test.en` and `test.vi` (almost 20K pairs).
+# Deployment
+I deployed the application in a very simple way on my local machine using the `http` library
 
-### Seq2seq model
-- Using RNN 
-- Orinial: Reference: [Google Tensorflow Example](https://www.tensorflow.org/text/tutorials/nmt_with_attention)
-### Modify:
-Multi-RNN NMT:
- - Generalization: `n` -> number of stage using in Encoder/Decoder. Each stage includes:
-   - Encoder: `n` groups - `Bidirectional LSTM`
-   - Decoder: `n` groups - `LSTM + Attention`
-   - In my implementation, `n = 2`
-#### Encoder
-![encoder.png](assets/pictures/encoder.png)
-#### Attention
-![attention.png](assets/pictures/attention.png)
-#### Decoder
-I'm drawing
+Basical usage: Run the following command with terminal:
 
-## Training
-- Optimizer: Adam optimizer
-- Leaning rate: initialize 1e-3, and decreased by 0.1 times every epoch after 20 epoches
-- ```
-  history = model.fit(train_ds.repeat(), 
-                      epochs=50, 
-                      steps_per_epoch = 2500, 
-                      validation_data=val_ds, 
-                      callbacks=[early_stopping, checkpoint])
-  ```
-- In training phase:
-  - Loss
+    `$ sh .\start-app.sh` (Windows) or `$ start-app.sh` (Linux) 
 
-![loss.png](assets/pictures/loss.png)
-  - Accuracy
+# Project Descriptions
+## Dataset
+I used [PhoMT](https://github.com/VinAIResearch/PhoMT) from VinAIResearch for this project. For more information about PhoMT, Please click on the link I placed in the previous line. 
 
-![accuracy.png](assets/pictures/accuracy.png)
+## Model
+### 1. Using RNN
 
-## Inference
-- In inference phase, 
+### 2. Transformer 
 
-## Result
-### BLEU Score
-- I use Google Colaboratory to train and test model, so i will update BLEU metrics into this project
-
-Model | BLEU
-:---: | :---:
-RNN | 19.425
-Modified | not yet tested
-- **Note:** I still update model until my model get best score
-
-### Examples
+### 3. Graph NN
 
 
-## Run project
-1. Install required packages: `$ ./run_build.sh` or `$ bash run_build.sh`
-2. Edit project's configuration in [config.py](thehs/_config.py)
-3. Normalized dataset: `$ python normalize_data.py`
-4. For training: `$ python train.py`
-5. For testing (evaluate metrics): `$ python test.py`
-6. Using trained model to translate: `translate(texts)` in file [translate.py](run_app.py)
+## Training and Inference
+Visit each model's [folder](thehs/model) to see the training and inference results.
+
+## BLEU Score
+|    Model    |  BLEU  |
+|:-----------:|:------:|
+|     RNN     | 19.425 |
+| Transformer | 22.422 |
+
+## Examples
+| English | Vietnamese |
+|:-------:|:----------:|
+|         |            |
+|         |            |
+
+# Next Steps
+1. 
