@@ -18,9 +18,9 @@ Multi-RNN NMT:
    - Decoder: `n` groups - `LSTM + Attention`
    - In my implementation, `n = 2`
 #### Encoder
-![encoder.png](pictures/encoder.png)
+![encoder.png](assets/pictures/encoder.png)
 #### Attention
-![attention.png](pictures/attention.png)
+![attention.png](assets/pictures/attention.png)
 #### Decoder
 I'm drawing
 
@@ -37,10 +37,10 @@ I'm drawing
 - In training phase:
   - Loss
 
-![loss.png](pictures/loss.png)
+![loss.png](assets/pictures/loss.png)
   - Accuracy
 
-![accuracy.png](pictures/accuracy.png)
+![accuracy.png](assets/pictures/accuracy.png)
 
 ## Inference
 - In inference phase, 
@@ -60,8 +60,8 @@ Modified | not yet tested
 
 ## Run project
 1. Install required packages: `$ ./run_build.sh` or `$ bash run_build.sh`
-2. Edit project's configuration in [config.py](config.py)
+2. Edit project's configuration in [config.py](thehs/_config.py)
 3. Normalized dataset: `$ python normalize_data.py`
 4. For training: `$ python train.py`
 5. For testing (evaluate metrics): `$ python test.py`
-6. Using trained model to translate: `translate(texts)` in file [translate.py](translate.py)
+6. Using trained model to translate: `translate(texts)` in file [translate.py](run_app.py)

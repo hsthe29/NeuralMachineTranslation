@@ -1,0 +1,12 @@
+{
+  "type": "RNN",
+  "params": {
+    "num_layers": 2,
+    "vocab_size": 16000,
+    "embedding_size": 256,
+    "hidden_units": 256,
+    "dropout_rate": 0.1,
+    "max_length": 128,
+    "processor": "bpe.16k"
+  }
+}

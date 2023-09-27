@@ -1,0 +1,12 @@
+{
+  "class_name": "RecurrentNMT",
+  "config": {
+    "num_layers": 2,
+    "vocab_size": 16000,
+    "embedding_size": 256,
+    "hidden_units": 128,
+    "dropout_rate": 0.1
+  },
+  "keras_version": "2.13.1",
+  "backend": "tensorflow"
+}

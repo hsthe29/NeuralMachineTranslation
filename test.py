@@ -1,67 +1,40 @@
-import json
-import os
 import tensorflow as tf
-import time
-from http.server import HTTPServer, BaseHTTPRequestHandler
-from io import BytesIO
-import config
-from src.language import Language
-from src.model.translator import Translator
-from src.model.rnn.nmt import NMT
-from src.utils import *
-import sys
-import webbrowser
-from nltk.translate.bleu_score import corpus_bleu
+
+from thehs import Parser
+from thehs.model import AutoModel
+from thehs.model import AutoConfig
+from thehs.utils import save_model
+from thehs.metrics import masked_acc
+from thehs.losses import MaskedLoss
+from thehs.dataset import make_dataset
+from thehs.schedule import StairReductionSchedule
+from thehs import Tokenizer
 
 
-def load_translator(model_path):
-    print("Loading vocabulary... ", end='')
-    en_vocab = load_vocab('vocab/vocab.en')
-    vi_vocab = load_vocab('vocab/vocab.vi')
-    print("Done")
+parser = Parser()
 
-    special_tokens = get_special_tokens()
+parser.DEFINE_string("name", None, "The name represents the training model")
+parser.DEFINE_bool("use-warmup", False)
+parser.DEFINE_float("init-lr", 1e-3)
 
-    english = Language(en_vocab, special_tokens, is_english=True)
-    vietnamese = Language(vi_vocab, special_tokens, is_english=False)
-    print("Building model...")
-    model = NMT(english, vietnamese, config.embedding_size, config.recurrent_units)
-    build(model, shape=(1, config.max_length))
-    print("Loading weights...")
-    model.load_weights(model_path)
-    translator = Translator(english, vietnamese, model)
-    print('Done! Translator has been created.')
-    return translator
-
-
-def calculate_bleu_score(references, predictions):
-    pass
+flags = parser.parse()
 
 
 if __name__ == "__main__":
-    num_evals = 5000
-    with open("data/normalized/test/test.en", "r", encoding="utf-8") as f:
-        en_sents = f.readlines()[:num_evals]
-    with open("data/normalized/test/test.vi", "r", encoding="utf-8") as f:
-        vi_ref_sents = f.readlines()[:num_evals]
+    config = AutoConfig.from_file("config.json")
+    tokenizer = Tokenizer(config.processor)
+    model = AutoModel.from_pretrained(config.name())
 
+    val_ds = make_dataset(("data/test/test.en", "data/test/test.vi"), tokenizer, max_length=config.max_length)
 
-    vi_references = []
+    optimizer = tf.keras.optimizers.Adam(StairReductionSchedule(1e-3, 3000, 800, reduction_proportion=0.95))
+    model.compile(optimizer=optimizer,
+                  loss=MaskedLoss(),
+                  metrics=[masked_acc])
 
-    for line in vi_ref_sents:
-        vi_references.append([line.strip().split()])
+    model.summary()
 
-    translator = load_translator("saved/model_weights.ckpt")
-    start_clock = time.perf_counter()
-    hypotheses = []
-    for i, sent in enumerate(en_sents):
-        result = translator(sent, max_length=config.max_length)
-        result = tf.strings.regex_replace(result, '_', ' ')
-        # result = tf.strings.regex_replace(result, r'(\s+)([.,?!])', r'\2')
-        hypotheses.append(result.numpy().decode().strip().split())
-        # print(hypotheses[i])
+    result = model.evaluate(val_ds, return_dict=True)
+    print(result)
 
-    bleu = corpus_bleu(vi_references, hypotheses)
-    end_clock = time.perf_counter()
-    print("BLEU score: ", bleu)
-    print("Took:", end_clock - start_clock, "s")
+    # save_model(model, config.name())
