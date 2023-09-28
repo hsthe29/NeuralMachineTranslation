@@ -32,10 +32,10 @@ class Decoder(keras.layers.Layer):
 
         self.fc = keras.layers.Dense(vocab_size)
 
-    def call(self, inputs, enc_seq, q_mask=None, v_mask=None, state=None):
+    def call(self, inputs, enc_seq, q_mask=None, v_mask=None, states=None):
         x = self.embedding(inputs)
 
-        for stage in self.stages:
+        for stage, state in zip(self.stages, states):
             x, _, _ = stage(x, enc_seq, q_mask, v_mask, state)
 
         logits = self.fc(x)

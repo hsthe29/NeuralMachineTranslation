@@ -10,7 +10,7 @@ class BaseMT(keras.Model):
         pass
 
     @abstractmethod
-    def encoder_output(self, input_ids: tf.Tensor):
+    def encode_input(self, input_ids: tf.Tensor):
         pass
 
     @abstractmethod

@@ -42,9 +42,9 @@ class RnnMT(BaseMT):
 
         batch_size = tf.shape(input_ids)[0]
         first_state = self.encoder.zero_state(batch_size)
-        enc_seq, state = self.encoder(input_ids, first_state)
+        enc_seq, states = self.encoder(input_ids, first_state)
 
-        logits = self.decoder(target_ids, enc_seq, q_mask=target_mask, v_mask=input_mask, state=state)
+        logits = self.decoder(target_ids, enc_seq, q_mask=target_mask, v_mask=input_mask, states=states)
 
         return logits
 
@@ -89,20 +89,20 @@ class RnnMT(BaseMT):
         self.__ids_array = tf.TensorArray(dtype=tf.int64, size=0, dynamic_size=True)
         self.__ids_index = 0
 
-    def encoder_output(self, input_ids):
+    def encode_input(self, input_ids):
         batch_size = tf.shape(input_ids)[0]
         first_state = self.encoder.zero_state(batch_size)
-        enc_seq, enc_state = self.encoder(input_ids, first_state)
-        return enc_seq, [enc_state, enc_state]
+        enc_seq, states = self.encoder(input_ids, first_state)
+        return enc_seq, states
 
     def next_ids(self, target_in_ids, prev_output, v_mask=None, attention=False):
-        enc_seq, state = prev_output
+        enc_seq, states = prev_output
         q_mask = tf.cast(target_in_ids != 0, dtype=tf.float32)
         logits, dec_state, attn_weight = self.decoder.next_ids(target_in_ids,
                                                                enc_seq,
                                                                q_mask=q_mask,
                                                                v_mask=v_mask,
-                                                               in_states=state)
+                                                               in_states=states)
         dec_output = (enc_seq, dec_state)
         if attention:
             return logits, dec_output, attn_weight

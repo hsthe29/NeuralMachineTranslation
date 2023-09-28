@@ -28,22 +28,25 @@ class Encoder(keras.layers.Layer):
         self.hidden_units = hidden_units
         self.embedding = keras.layers.Embedding(vocab_size, embedding_size, mask_zero=True)
         self.stages = []
+        self.merge_states = []
         for _ in range(num_layers):
             self.stages.append(EncoderStage(hidden_units, dropout_rate))
-
-        self.merge_hidden_state = keras.layers.Dense(hidden_units)
-        self.merge_cell_state = keras.layers.Dense(hidden_units)
+            self.merge_states.append((keras.layers.Dense(hidden_units),
+                                      keras.layers.Dense(hidden_units)))
 
     def call(self, input_ids, state=None):
         x = self.embedding(input_ids)
-        for stage in self.stages:
+        states = []
+        for stage, merge_state in zip(self.stages, self.merge_states):
             x, state = stage(x, state=state)
-        fh, fc, bh, bc = state
-        fhs = keras.layers.concatenate([fh, bh])
-        fcs = keras.layers.concatenate([fc, bc])
-        hs = self.merge_hidden_state(fhs)
-        cs = self.merge_cell_state(fcs)
-        return x, (hs, cs)
+            fh, fc, bh, bc = state
+            fhs = keras.layers.concatenate([fh, bh])
+            fcs = keras.layers.concatenate([fc, bc])
+            hs = merge_state[0](fhs)
+            cs = merge_state[1](fcs)
+            states.append((hs, cs))
+
+        return x, states
 
     def zero_state(self, batch_size):
         return [
