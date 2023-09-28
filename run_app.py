@@ -44,20 +44,28 @@ class AppServer(BaseHTTPRequestHandler):
     def do_POST(self):
         content_length = int(self.headers['Content-Length'])  # <--- Gets the size of data
         post_data = self.rfile.read(content_length)  # <--- Gets the data itself
-        if post_data == b'terminate':
-            print('Session terminating...')
-            sys.exit(0)
-        post_data = json.loads(post_data.decode())
-        target_text = translator.translate(post_data['text'])
-        response_data = {
-            'lang': 'vi',
-            'text': target_text[0]
-        }
+
+        is_shutdown = post_data == b'shutdown'
+        if is_shutdown:
+            print('Shutting down Server ...')
+            response_data = {
+                'status': "shutdown"
+            }
+        else:
+            bytes_data = json.loads(post_data.decode())
+            target_text = translator.translate(bytes_data['text'])
+            response_data = {
+                'lang': 'vi',
+                'text': target_text[0]
+            }
         response_data = json.dumps(response_data).encode('utf=8')
         self._set_response()
         response = BytesIO()
         response.write(response_data)
         self.wfile.write(response.getvalue())
+
+        if is_shutdown:
+            raise KeyboardInterrupt()
 
 
 def create_translator():
@@ -79,7 +87,8 @@ if __name__ == "__main__":
         webbrowser.open(appURL, new=1)
         httpd.serve_forever()
     except KeyboardInterrupt:
-        print("\033[91mErrors occur when running application. Interrupt!\033[0m")
+        print("\033[91mShutdown Server!\033[0m")
     finally:
         httpd.server_close()
+        print("Server closed!")
     print(time.asctime(), "| Stop Server - %s:%s" % (HOST_NAME, flags.PORT))

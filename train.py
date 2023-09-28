@@ -24,7 +24,7 @@ if __name__ == "__main__":
     config = AutoConfig.from_file("config.json")
 
     tokenizer = Tokenizer(config.processor)
-    #
+
     train_ds = make_dataset(("data/dev/dev.en", "data/dev/dev.vi"), tokenizer, max_length=config.max_length)
     val_ds = make_dataset(("data/test/test.en", "data/test/test.vi"), tokenizer, max_length=config.max_length)
     steps_per_ds = int(train_ds.cardinality())

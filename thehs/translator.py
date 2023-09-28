@@ -28,11 +28,11 @@ class Translator(tf.Module):
         self.token_mask = tf.convert_to_tensor(token_mask[tf.newaxis, tf.newaxis, :])
 
     def __call__(self, input_ids):
-        enc_out = self.translator.encoder_output(input_ids)
+        enc_out = self.translator.encode_input(input_ids)
         pass
 
     def __greedy_search(self, input_ids):
-        prev_out = self.translator.encoder_output(input_ids)
+        prev_out = self.translator.encode_input(input_ids)
         batch_size = tf.shape(input_ids)[0]
         first_ids = tf.reshape(tf.cast([self.bos_id] * batch_size.numpy(), tf.int64), shape=(-1, 1))
         target_in_ids = self.translator.update_target_in_ids(first_ids)

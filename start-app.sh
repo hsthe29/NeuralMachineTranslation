@@ -12,6 +12,6 @@ else
     echo -e "${YELLOW}WARNING: No Conda environment provided. Run application with user environment. Recommend using Conda virtual environment.${NC}"
 fi
 
-$EXECUTABLE_PATH run_app.py --PORT=8000
+$EXECUTABLE_PATH run_app.py --PORT=8080
 
 echo Done
