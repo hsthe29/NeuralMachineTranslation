@@ -41,6 +41,12 @@ Base config:
 
 ### 3. Graph NN
 
+## Learning rate schedule
+### Warmup Schedule
+$lr = d_{model}^{-0.5}*min(step\_num^{-0.5}, step\_num*warmup\_steps^{-1.5})$
+### Warmup Linear Schedule
+
+### Stair Reduction Schedule
 
 ## Training and Inference
 Train on the PhoMT dataset with the following parameters:
