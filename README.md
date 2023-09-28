@@ -43,6 +43,9 @@ Base config:
 
 ## Learning rate schedule
 ### Warmup Schedule
+```math
+lr = d_{model}^{-0.5}*min(step\_num^{-0.5}, step\_num*warmup\_steps^{-1.5})
+```
 $lr = d_{model}^{-0.5}*min(step\_num^{-0.5}, step\_num*warmup\_steps^{-1.5})$
 ### Warmup Linear Schedule
 
