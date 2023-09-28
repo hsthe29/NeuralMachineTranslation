@@ -1,11 +1,16 @@
 @import url('https://fonts.googleapis.com/css?family=IBM+Plex+Sans+Condensed:100,200,300,400');
 
-body{
-    background-color: #ffffff;
+body {
+    background-color: #333542;  /* Màu nền màu xám nhẹ */
 }
 
 textarea{
-    font-size: 18px;
+    font-size: 20px;
+    width: 100%;  
+    border-radius: 10px;        /* Góc bo tròn 10px */
+    padding: 10px;
+    background-color: #444654;
+    color: #FFFFFF
 }
 
 hr.rounded {
@@ -25,23 +30,64 @@ th, td {
     word-wrap: break-word; /* Enable line wrapping for long text */
 }
 
-.table-container {
-    position: absolute;
-    left: 50%;
-    transform: translate(-50%, 0%);
+.application-name {
+    color: #b2d8ac;
 }
 
-.language-name {
-    font-size: 20px;
-    font-weight: bold;
-    color:rgba(0, 47, 255, 0.988)
+.nav-div {
+    display: flex;
+    justify-content: space-between;
+}
+
+.history-tab {
+    background-color: #a448c2;
+    border-radius: 10px;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.history-tab :hover {
+    cursor: pointer;
+}
+
+.history-tab h2 {
+    margin-left: 15px;
+    color: floralwhite;
+}
+
+.history-div {
+    overflow: hidden;
+    height: 0;
+    transition: height 0.3s ease;
+    margin-left: 40px;
+    margin-right: 40px;
+}
+
+.history-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px; /* Khoảng cách giữa các dòng */
+}
+
+.history-row textarea {
+    width: 46%; 
+    resize: none;
+    overflow: hidden;
+}
+
+.language {
+    font-size: 25px;
+    color:rgb(82, 96, 225)
 }
 
 .box {
     border: none;
-    column-gap: 20px;
-    margin-left: 50px;
+    /* column-gap: 20px; */
+    /* margin-left: 50px; */
     display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 50px;
 }
 .btn-box {
     margin-top: 20px;
@@ -60,21 +106,11 @@ th, td {
     border: none;
 }
 
-.mr-0 {
-    margin-right: 10px;
-}
-.ml-auto {
-    margin-left:auto;
-}
-.d-block {
-    display:block;
-}
-
 .button {
     align-items: center;
     appearance: none;
     background-color: #3EB2FD;
-    background-image: linear-gradient(1deg, #4F58FD, #149BF3 99%);
+    background-image: linear-gradient(1deg, #232de2, #1ca1f9 100%);
     background-size: calc(100% + 20px) calc(100% + 20px);
     border-radius: 100px;
     border-width: 0;
@@ -113,42 +149,68 @@ th, td {
     box-shadow: rgba(40, 170, 255, 0.25) 0 0 0 .125em;
 }
 
-.button-term {
-    background: #e62143;
-    border-radius: 11px;
-    box-sizing: border-box;
-    color: #fff;
-    cursor: pointer;
+.end-button {
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
     display: flex;
-    font-family: Mija,-apple-system,BlinkMacSystemFont,Roboto,"Roboto Slab","Droid Serif","Segoe UI",system-ui,Arial,sans-serif;
-    font-size: 1.15em;
-    font-weight: 700;
+    align-items: center;
     justify-content: center;
-    /* line-height: 33.4929px; */
-    padding: .4em 1em;
+    position: relative;
+    overflow: hidden;
+}
+
+.inner-circle {
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    background-color: green;
+    border-radius: 50%;
+    transition: background-color 0.3s, width 0.3s, height 0.3s;
+}
+
+.spin-circle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 3px solid transparent;
+    border-top-color: yellow;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    animation: spin 1s infinite linear;
+}
+
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.unclickable {
+    pointer-events: none;   /* Ngăn chặn mọi sự kiện chuột */
+}
+
+.toast {
+    visibility: hidden;
+    min-width: 250px;
+    margin-left: -125px;
+    background-color: #9c9b9b58;
+    color: rgb(255, 255, 255);
     text-align: center;
-    text-decoration: none;
-    text-decoration-skip-ink: auto;
-    text-shadow: rgba(0, 0, 0, .3) 1px 1px 1px;
-    text-underline-offset: 1px;
-    transition: all .2s ease-in-out;
-    user-select: none;
-    -webkit-user-select: none;
-    touch-action: manipulation;
-    /* width: 100%; */
-    word-break: break-word;
-    border: 0;
+    border-radius: 20px;
+    padding: 10px;
+    position: fixed;
+    z-index: 1;
+    left: 50%;
+    bottom: 30px;
+    font-size: 25px;
+    transition: visibility 0.5s, opacity 0.5s linear;
+    opacity: 0;
 }
 
-.button-term:active,
-.button-term:focus {
-    border-bottom-style: none;
-    border-color: #dadada;
-    box-shadow: rgba(0, 0, 0, .3) 0 3px 3px inset;
-    outline: 0;
-}
-
-.button-term:hover {
-    border-bottom-style: none;
-    border-color: #dadada;
+.toast.show {
+    visibility: visible;
+    opacity: 1;
 }
