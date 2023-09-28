@@ -46,10 +46,19 @@ Base config:
 ```math
 lr = d_{model}^{-0.5}*min(step\_num^{-0.5}, step\_num*warmup\_steps^{-1.5})
 ```
-$lr = d_{model}^{-0.5}*min(step\_num^{-0.5}, step\_num*warmup\_steps^{-1.5})$
+
 ### Warmup Linear Schedule
+```math
+lr = \begin{cases}
+init\_lr*\frac{step}{warmup\_steps}, & step < warmup\_steps \\
+init\_lr*\frac{train\_steps - step}{train\_steps - warmup\_steps}, & otherwise
+\end{cases}
+```
 
 ### Stair Reduction Schedule
+```math
+
+```
 
 ## Training and Inference
 Train on the PhoMT dataset with the following parameters:
