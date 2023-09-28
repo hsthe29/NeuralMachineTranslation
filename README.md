@@ -26,6 +26,17 @@ I used [PhoMT](https://github.com/VinAIResearch/PhoMT) from VinAIResearch for th
 ## Model
 ### 1. Using RNN
 ![](assets/architecture/recurrent-mt.png)
+
+Base config:
+```
+- num_layers = 2
+- hidden_units = 256
+- embedding_size = 256
+- dropout_rate = 0.1,
+- max_length = 128,
+- vocab_size = 16000 (bpe.16k)
+```
+
 ### 2. Transformer 
 
 ### 3. Graph NN
