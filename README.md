@@ -1,4 +1,5 @@
 # Neural Machine Translation
+- Note: this project will no longer be updated. Check out the latest version of my `Machine Translation` project [here](https://github.com/hsthe29/Translation). Thank you.
 
 # Overview
 Implementation and deployment of the machine translation application as a web application
