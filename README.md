@@ -3,18 +3,33 @@
 # Overview
 Implementation and deployment of the machine translation application as a web application
 
-This app has 3 Machine Translation models:
-1. RNN based (LSTM): **Available**
-2. Transformer: **Available**
-3. Graph NN: In **development**
+# Model:
+- RNN-based with Transformer-like architecture:
 
-# Deployment
+# Usage
+
+Clone this repository: ``
+
+Edit model configuration in [config.json](config/config.json)
+
+Edit argument in [train.sh](train.sh)
+
+Training
+
+    $ sh .\train.sh (Windows)
+    $ train.sh (Linux)
+
+Or download model's weights at [drive]()
+
+## Deployment
 I deployed the application in a very simple way on my local machine using the `http` library
 
 Basical usage: Run the following command with terminal:
 
     $ sh .\start-app.sh (Windows)
     $ start-app.sh (Linux)
+
+Recommended TensorFlow version: `2.13.x`
 
 ## Web Interface
 ![](assets/pictures/web-interface/webui.png)
@@ -66,25 +81,10 @@ Train on the PhoMT dataset with the following parameters:
 - Steps per epoch = 20000
 - Batch size = 32
 - Learning rate reduction proportion = 0.96
-
-Therefore, to iter the entire data set will require about 4.5 epochs
-
-Finetune:
-- Fine tune on MTet dataset
+- 
 
 Visit each model's [folder](thehs/model) to see the training and inference results.
 
-## BLEU Score
-|    Model    |  BLEU  |
-|:-----------:|:------:|
-|     RNN     | 26.525 |
-| Transformer | 28.422 |
-
-## Examples
-| English | Vietnamese |
-|:-------:|:----------:|
-|         |            |
-|         |            |
 
 # Next Steps
 1. 
